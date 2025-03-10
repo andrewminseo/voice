@@ -1527,4 +1527,93 @@
                     </div>
                     <div class="toast-content">
                         <div class="toast-title">${title}</div>
-                        <div class="toast-mess
+                        <div class="toast-message">${message}</div>
+                    </div>
+                    <button class="toast-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // Add to container
+                toastContainer.appendChild(toast);
+                
+                // Add close handler
+                const closeBtn = toast.querySelector('.toast-close');
+                closeBtn.addEventListener('click', () => {
+                    toast.remove();
+                });
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }
+                }, 5000);
+            }
+            
+            // Save transcript to localStorage
+            function saveTranscriptToLocalStorage() {
+                try {
+                    localStorage.setItem('transcript_segments', JSON.stringify(transcriptSegments));
+                } catch (e) {
+                    console.error('Error saving transcript to localStorage:', e);
+                }
+            }
+            
+            // Load saved data
+            function loadSavedData() {
+                // Load speakers
+                const savedSpeakers = localStorage.getItem('speaker_profiles');
+                if (savedSpeakers) {
+                    try {
+                        speakerProfiles = JSON.parse(savedSpeakers);
+                        updateSpeakersList();
+                    } catch (e) {
+                        console.error('Error parsing saved speakers:', e);
+                    }
+                }
+                
+                // Load transcript
+                const savedTranscript = localStorage.getItem('transcript_segments');
+                if (savedTranscript) {
+                    try {
+                        transcriptSegments = JSON.parse(savedTranscript);
+                        updateTranscriptDisplay();
+                    } catch (e) {
+                        console.error('Error parsing saved transcript:', e);
+                    }
+                }
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Tab key to switch speakers
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    
+                    // Update UI
+                    updateSpeakersList();
+                    
+                    showToast('Speaker Changed', `Active speaker changed to ${speakerProfiles[currentSpeakerIndex].name}`, 'success');
+                }
+            });
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            pauseBtn.addEventListener('click', pauseRecording);
+            clearBtn.addEventListener('click', clearTranscript);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadTranscriptBtn.addEventListener('click', downloadTranscript);
+            downloadAudioBtn.addEventListener('click', () => downloadAudio());
+            addSpeakerBtn.addEventListener('click', openSpeakerModal);
+            closeModalBtn.addEventListener('click', closeSpeakerModal);
+            cancelSpeakerBtn.addEventListener('click', closeSpeakerModal);
+            saveSpeakerBtn.addEventListener('click', addSpeaker);
+            
+            // Initialize application
+            loadSavedData();
+            setupSpeechRecognition();
+        });
