@@ -406,15 +406,33 @@
             // Start recording function
             function startRecording() {
                 try {
-                    recognition.start();
-                    isRecording = true;
-                    status.classList.add('status-recording');
-                    statusText.textContent = 'Recording...';
-                    recordBtn.disabled = true;
-                    stopBtn.disabled = false;
+                    // Request microphone permission first
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(stream => {
+                            // Once we have microphone permission, start recognition
+                            try {
+                                recognition.start();
+                                isRecording = true;
+                                status.classList.add('status-recording');
+                                statusText.textContent = 'Recording...';
+                                recordBtn.disabled = true;
+                                stopBtn.disabled = false;
+                                
+                                // Close the stream as we don't need it directly
+                                stream.getTracks().forEach(track => track.stop());
+                            } catch (recognitionError) {
+                                console.error('Error starting recognition:', recognitionError);
+                                statusText.textContent = 'Error starting recognition';
+                            }
+                        })
+                        .catch(micError => {
+                            console.error('Microphone permission denied:', micError);
+                            statusText.textContent = 'Microphone permission denied';
+                            alert("You need to allow microphone access to use the voice transcription feature.");
+                        });
                 } catch (error) {
-                    console.error('Error starting recognition:', error);
-                    statusText.textContent = 'Error starting recognition';
+                    console.error('Error requesting microphone:', error);
+                    statusText.textContent = 'Error requesting microphone';
                 }
             }
             
@@ -539,6 +557,15 @@
                 console.error('Recognition error:', event.error);
                 statusText.textContent = `Error: ${event.error}`;
                 stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
             };
             
             recognition.onend = () => {
