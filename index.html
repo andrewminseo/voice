@@ -1,76 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoiceNote | Modern Transcription</title>
+    <title>Voice Transcription</title>
     <style>
         :root {
-            /* Light Mode (default) */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --bg-tertiary: #f1f3f5;
-            --text-primary: #212529;
-            --text-secondary: #495057;
-            --text-muted: #6c757d;
-            --accent-primary: #228be6;
-            --accent-secondary: #4dabf7;
-            --border-color: #dee2e6;
-            --error-color: #fa5252;
-            --success-color: #40c057;
-            --recording-color: #fa5252;
-            --card-bg: #ffffff;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-            
-            /* Animation durations */
-            --transition-fast: 0.15s;
-            --transition-normal: 0.3s;
-            --transition-slow: 0.5s;
-        }
-        
-        /* Dark mode */
-        html[data-theme="dark"] {
-            --bg-primary: #212529;
-            --bg-secondary: #343a40;
-            --bg-tertiary: #495057;
-            --text-primary: #f8f9fa;
-            --text-secondary: #e9ecef;
-            --text-muted: #adb5bd;
-            --accent-primary: #339af0;
-            --accent-secondary: #74c0fc;
-            --border-color: #495057;
-            --card-bg: #2b3035;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Blue light filter mode */
-        html[data-theme="blue-light"] {
-            --bg-primary: #fff4e6;
-            --bg-secondary: #ffe8cc;
-            --bg-tertiary: #ffd8a8;
-            --text-primary: #332211;
-            --text-secondary: #664422;
-            --accent-primary: #e67700;
-            --accent-secondary: #f59f00;
-            --border-color: #ffe8cc;
-            --card-bg: #fff4e6;
-            --card-shadow: 0 4px 6px rgba(150, 100, 50, 0.1);
-        }
-        
-        /* Discreet mode */
-        html[data-theme="discreet"] {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: #f1f3f5;
-            --bg-tertiary: #e9ecef;
-            --text-primary: #343a40;
-            --text-secondary: #495057;
-            --text-muted: #868e96;
-            --accent-primary: #495057;
-            --accent-secondary: #868e96;
-            --border-color: #e9ecef;
-            --recording-color: #868e96;
-            --card-bg: #f8f9fa;
-            --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --light-color: #f0f5f9;
+            --dark-color: #1e2022;
+            --accent-color: #47b8e0;
+            --error-color: #e74c3c;
+            --success-color: #2ecc71;
         }
         
         * {
@@ -80,725 +22,274 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--text-primary);
-            background-color: var(--bg-primary);
-            transition: background-color var(--transition-normal), color var(--transition-normal);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            padding: 20px;
         }
         
         header {
-            padding: 1.5rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .controls {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
-            transition: border-color var(--transition-normal);
-        }
-        
-        .app-title {
-            display: flex;
             align-items: center;
-            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            gap: 10px;
         }
         
-        .app-title h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            transition: color var(--transition-normal);
-        }
-        
-        .app-title .logo {
-            color: var(--accent-primary);
-            transition: color var(--transition-normal);
-        }
-        
-        .app-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-            transition: color var(--transition-normal);
-        }
-        
-        .theme-switcher {
-            display: flex;
-            align-items: center;
-            background: var(--bg-secondary);
-            border-radius: 2rem;
-            padding: 0.25rem;
-            transition: background-color var(--transition-normal);
-        }
-        
-        .theme-option {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: background-color var(--transition-fast), color var(--transition-fast);
-        }
-        
-        .theme-option.active {
-            background-color: var(--accent-primary);
-            color: white;
-        }
-        
-        .theme-option:hover:not(.active) {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem 0;
-        }
-        
-        .record-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 2rem;
-            gap: 1.5rem;
-        }
-        
-        .record-button {
-            width: 4rem;
-            height: 4rem;
-            border-radius: 50%;
+        .btn {
+            padding: 12px 24px;
             border: none;
-            background-color: var(--accent-primary);
-            color: white;
+            border-radius: 50px;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform var(--transition-fast), background-color var(--transition-fast);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            gap: 8px;
         }
         
-        .record-button:hover {
-            transform: scale(1.05);
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
         }
         
-        .record-button:disabled {
-            background-color: var(--bg-tertiary);
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-primary:disabled {
+            background-color: #ccc;
             cursor: not-allowed;
-            transform: none;
         }
         
-        .record-button svg {
-            width: 1.5rem;
-            height: 1.5rem;
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
         }
         
-        .recording .record-button {
-            background-color: var(--recording-color);
-            animation: pulse 1.5s infinite;
+        .btn-danger:hover {
+            background-color: #c0392b;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .icon {
+            width: 18px;
+            height: 18px;
         }
         
-        .speaker-selector {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            background-color: var(--bg-secondary);
-            padding: 0.75rem 1rem;
-            border-radius: 1.5rem;
-            transition: background-color var(--transition-normal);
-        }
-        
-        .speaker-selector-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        
-        .speaker-selector select {
-            background-color: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            padding-right: 1rem;
-            cursor: pointer;
-            transition: color var(--transition-normal);
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M12 16l-6-6h12z' fill='rgba(128,128,128,0.7)'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right center;
-            padding-right: 1.5rem;
-        }
-        
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            transition: color var(--transition-normal);
+        .speaker-profiles {
             margin-bottom: 1.5rem;
         }
         
-        .status-dot {
-            width: 0.75rem;
-            height: 0.75rem;
-            border-radius: 50%;
-            background-color: var(--text-muted);
-            transition: background-color var(--transition-normal);
-        }
-        
-        .recording .status-dot {
-            background-color: var(--recording-color);
-            animation: pulse 1.5s infinite;
-        }
-        
-        .recording .status-text {
-            color: var(--recording-color);
-        }
-        
         .transcript-container {
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
-            box-shadow: var(--card-shadow);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            flex: 1;
+            margin-top: 2rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 300px;
+            max-height: 60vh;
             overflow-y: auto;
-            transition: background-color var(--transition-normal), box-shadow var(--transition-normal);
+            background-color: #fafafa;
         }
         
-        .transcript-content {
+        .transcript-text {
             white-space: pre-wrap;
             line-height: 1.7;
         }
         
-        .transcript-content p {
-            margin-bottom: 1rem;
-        }
-        
-        .transcript-content .interim {
-            opacity: 0.7;
-        }
-        
         .speaker {
-            font-weight: 600;
-            display: inline-block;
-            margin-right: 0.5rem;
-            transition: color var(--transition-normal);
+            font-weight: bold;
+            margin-right: 6px;
         }
         
-        .speaker-1 { color: var(--accent-primary); }
-        .speaker-2 { color: var(--success-color); }
-        .speaker-3 { color: #f59f00; } /* amber */
-        
-        .recordings-section {
-            margin-top: 2rem;
+        .speaker-1 {
+            color: var(--primary-color);
         }
         
-        .recordings-header {
+        .speaker-2 {
+            color: var(--secondary-color);
+        }
+        
+        .speaker-3 {
+            color: var(--accent-color);
+        }
+        
+        .status {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             margin-bottom: 1rem;
-        }
-        
-        .recordings-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            transition: color var(--transition-normal);
-        }
-        
-        .recordings-count {
             font-size: 0.9rem;
-            color: var(--text-secondary);
-            transition: color var(--transition-normal);
+            font-weight: 500;
         }
         
-        .recordings-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            list-style: none;
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 8px;
         }
         
-        .recording-card {
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            transition: transform var(--transition-fast), background-color var(--transition-normal), box-shadow var(--transition-normal);
+        .status-recording .status-indicator {
+            background-color: var(--error-color);
+            animation: pulse 1.5s infinite;
         }
         
-        .recording-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .recording-info {
-            padding: 1rem;
-        }
-        
-        .recording-title {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-primary);
-            transition: color var(--transition-normal);
-        }
-        
-        .recording-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            transition: color var(--transition-normal);
-        }
-        
-        .recording-controls {
-            display: flex;
-            border-top: 1px solid var(--border-color);
-            transition: border-color var(--transition-normal);
-        }
-        
-        .recording-btn {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            background-color: transparent;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: background-color var(--transition-fast), color var(--transition-fast);
+        .profile-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 0.9rem;
         }
         
-        .recording-btn:hover {
-            background-color: var(--bg-secondary);
-            color: var(--accent-primary);
-        }
-        
-        .recording-btn:not(:last-child) {
-            border-right: 1px solid var(--border-color);
-            transition: border-color var(--transition-normal);
-        }
-        
-        .recording-btn svg {
-            width: 1rem;
-            height: 1rem;
-        }
-        
-        /* Add new speaker section */
-        .add-speaker-row {
-            display: flex;
-            align-items: center;
-            margin-top: 1rem;
-            gap: 0.75rem;
-        }
-        
-        .add-speaker-input {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            transition: border-color var(--transition-fast), background-color var(--transition-normal), color var(--transition-normal);
-        }
-        
-        .add-speaker-input:focus {
-            border-color: var(--accent-primary);
-            outline: none;
-        }
-        
-        .add-speaker-btn {
-            padding: 0.75rem 1rem;
-            border: none;
-            border-radius: 0.5rem;
-            background-color: var(--accent-primary);
+        .add-profile {
+            background-color: var(--success-color);
             color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
-            transition: background-color var(--transition-fast);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
-        .add-speaker-btn:hover {
-            background-color: var(--accent-secondary);
+        .add-profile:hover {
+            background-color: #27ae60;
         }
         
-        .add-speaker-btn svg {
-            width: 1rem;
-            height: 1rem;
-        }
-        
-        /* Toast notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            z-index: 1000;
-        }
-        
-        .toast {
-            padding: 1rem 1.5rem;
-            border-radius: 0.5rem;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            animation: slideIn 0.3s forwards;
-            max-width: 24rem;
-        }
-        
-        .toast.success {
-            border-left: 4px solid var(--success-color);
-        }
-        
-        .toast.error {
-            border-left: 4px solid var(--error-color);
-        }
-        
-        .toast-icon {
-            color: var(--success-color);
-        }
-        
-        .toast.error .toast-icon {
-            color: var(--error-color);
-        }
-        
-        .toast-message {
-            flex: 1;
-        }
-        
-        .toast-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.25rem;
-            margin-left: 0.5rem;
-            transition: color var(--transition-fast);
-        }
-        
-        .toast-close:hover {
-            color: var(--text-primary);
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        @keyframes slideOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--transition-normal);
-        }
-        
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        .modal {
-            background-color: var(--card-bg);
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: translateY(20px);
-            transition: transform var(--transition-normal), opacity var(--transition-normal), background-color var(--transition-normal);
-            opacity: 0;
-        }
-        
-        .modal-overlay.open .modal {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: border-color var(--transition-normal);
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            transition: color var(--transition-normal);
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 0.5rem;
-            transition: color var(--transition-fast);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-close:hover {
-            color: var(--text-primary);
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .modal-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border-color);
+        .export-options {
+            margin-top: 1.5rem;
             display: flex;
             justify-content: flex-end;
-            gap: 0.75rem;
-            transition: border-color var(--transition-normal);
+            gap: 10px;
         }
         
-        .modal-btn {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-radius: 0.5rem;
+        .btn-sm {
+            padding: 8px 16px;
             font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color var(--transition-fast), color var(--transition-fast);
         }
         
-        .modal-btn-secondary {
-            background-color: var(--bg-secondary);
-            color: var(--text-secondary);
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
         }
         
-        .modal-btn-secondary:hover {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        
-        .modal-btn-primary {
-            background-color: var(--accent-primary);
-            color: white;
-        }
-        
-        .modal-btn-primary:hover {
-            background-color: var(--accent-secondary);
-        }
-        
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            transition: color var(--transition-normal);
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            transition: border-color var(--transition-fast), background-color var(--transition-normal), color var(--transition-normal);
-        }
-        
-        .form-input:focus {
-            border-color: var(--accent-primary);
-            outline: none;
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .export-options {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="app-title">
-                <svg class="logo" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                    <line x1="12" y1="19" x2="12" y2="23"></line>
-                    <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-                <h1>VoiceNote</h1>
-            </div>
-            
-            <div class="theme-switcher">
-                <div class="theme-option active" data-theme="light" title="Light Mode">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                </div>
-                <div class="theme-option" data-theme="dark" title="Dark Mode">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </div>
-                <div class="theme-option" data-theme="blue-light" title="Blue Light Filter">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.5 9.5L9 15l-2.5-2.5"></path>
-                        <circle cx="12" cy="12" r="10"></circle>
-                    </svg>
-                </div>
-                <div class="theme-option" data-theme="discreet" title="Discreet Mode">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                </div>
-            </div>
+            <h1>Voice Transcription</h1>
+            <p>Click Record to start capturing audio and generating real-time transcription</p>
         </header>
         
-        <div class="main">
-            <p class="app-description">Record your voice and get instant transcription. Your recordings are saved automatically.</p>
-            
-            <div class="speaker-selector">
-                <span class="speaker-selector-label">Active speaker:</span>
-                <select id="speakerSelect" class="speaker-select">
-                    <option value="speaker-1">Speaker 1</option>
-                </select>
-            </div>
-            
-            <div class="add-speaker-row">
-                <input type="text" class="add-speaker-input" id="newSpeakerName" placeholder="Add new speaker name...">
-                <button class="add-speaker-btn" id="addSpeakerBtn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Add Speaker
-                </button>
-            </div>
-            
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span class="status-text">Ready to record</span>
-            </div>
-            
-            <div class="record-controls">
-                <button id="recordBtn" class="record-button" title="Start Recording">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="6"></circle>
-                    </svg>
-                </button>
-                
-                <button id="stopBtn" class="record-button" disabled title="Stop Recording">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-                    </svg>
-                </button>
-            </div>
-            
-            <div class="transcript-container">
-                <div id="transcript" class="transcript-content"></div>
-            </div>
-            
-            <div class="recordings-section">
-                <div class="recordings-header">
-                    <h2 class="recordings-title">Your Recordings</h2>
-                    <span id="recordingsCount" class="recordings-count">0 recordings</span>
-                </div>
-                
-                <ul id="recordingsList" class="recordings-list">
-                    <!-- Recordings will be added here dynamically -->
-                </ul>
-            </div>
+        <div class="status">
+            <div class="status-indicator"></div>
+            <span class="status-text">Ready to record</span>
         </div>
-    </div>
-    
-    <div id="saveModal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Save Recording</h3>
-                <button class="modal-close" id="closeModal">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="recordingTitle" class="form-label">Recording Title</label>
-                    <input type="text" id="recordingTitle" class="form-input" placeholder="Enter a title for your recording">
+        
+        <div class="speaker-profiles">
+            <h3>Speaker Profiles</h3>
+            <div class="profile-list">
+                <div class="profile-row">
+                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
+                    <select class="profile-voice">
+                        <option value="default">Default Voice Profile</option>
+                    </select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="cancelSave" class="modal-btn modal-btn-secondary">Cancel</button>
-                <button id="saveRecording" class="modal-btn modal-btn-primary">Save</button>
-            </div>
+            <button class="add-profile" id="addProfile">+ Add Speaker</button>
+        </div>
+        
+        <div class="controls">
+            <button id="recordBtn" class="btn btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="6"></circle>
+                </svg>
+                Record
+            </button>
+            
+            <button id="stopBtn" class="btn btn-danger" disabled>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                </svg>
+                Stop
+            </button>
+        </div>
+        
+        <div class="transcript-container">
+            <div id="transcript" class="transcript-text"></div>
+        </div>
+        
+        <div class="export-options">
+            <button id="copyBtn" class="btn btn-sm btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Text
+            </button>
+            <button id="downloadBtn" class="btn btn-sm btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+            </button>
         </div>
     </div>
-    
-    <div class="toast-container" id="toastContainer">
-        <!-- Toasts will be added here dynamically -->
-    </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
@@ -806,66 +297,25 @@
             const stopBtn = document.getElementById('stopBtn');
             const transcript = document.getElementById('transcript');
             const statusText = document.querySelector('.status-text');
-            const statusIndicator = document.querySelector('.status-indicator');
-            const speakerSelect = document.getElementById('speakerSelect');
-            const newSpeakerName = document.getElementById('newSpeakerName');
-            const addSpeakerBtn = document.getElementById('addSpeakerBtn');
-            const recordingsList = document.getElementById('recordingsList');
-            const recordingsCount = document.getElementById('recordingsCount');
-            const saveModal = document.getElementById('saveModal');
-            const recordingTitle = document.getElementById('recordingTitle');
-            const saveRecordingBtn = document.getElementById('saveRecording');
-            const cancelSaveBtn = document.getElementById('cancelSave');
-            const closeModalBtn = document.getElementById('closeModal');
-            const toastContainer = document.getElementById('toastContainer');
-            const themeSwitcher = document.querySelector('.theme-switcher');
-            
-            // Theme switching
-            const themeOptions = document.querySelectorAll('.theme-option');
-            
-            themeOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    const theme = option.getAttribute('data-theme');
-                    document.documentElement.setAttribute('data-theme', theme);
-                    
-                    // Update active state
-                    themeOptions.forEach(opt => opt.classList.remove('active'));
-                    option.classList.add('active');
-                    
-                    // Save preference to localStorage
-                    localStorage.setItem('preferredTheme', theme);
-                });
-            });
-            
-            // Load saved theme preference
-            const savedTheme = localStorage.getItem('preferredTheme');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-                themeOptions.forEach(option => {
-                    if (option.getAttribute('data-theme') === savedTheme) {
-                        option.classList.add('active');
-                    } else {
-                        option.classList.remove('active');
-                    }
-                });
-            }
+            const status = document.querySelector('.status');
+            const copyBtn = document.getElementById('copyBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const addProfileBtn = document.getElementById('addProfile');
+            const profileList = document.querySelector('.profile-list');
             
             // Speech Recognition Setup
+            // Properly handle different browser implementations
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
             
             // Check if speech recognition is supported
             if (!window.SpeechRecognition) {
-                showToast('Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.', 'error');
+                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
                 recordBtn.disabled = true;
                 statusText.textContent = "Speech recognition not supported";
                 return;
             }
             
             const recognition = new window.SpeechRecognition();
-            
-            // Media Recorder for audio recording
-            let mediaRecorder;
-            let audioChunks = [];
             
             // Configure speech recognition
             recognition.continuous = true;
@@ -876,137 +326,121 @@
             // State variables
             let isRecording = false;
             let currentSpeakerIndex = 0;
-            let speakers = [{name: 'Speaker 1', id: 'speaker-1'}];
+            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
             let transcriptSegments = [];
-            let recordings = [];
-            let currentAudioBlob = null;
-            let currentStreamRef = null;
             
-            // Load saved speakers and recordings from local storage
-            function loadSavedData() {
-                const savedSpeakers = localStorage.getItem('voicenoteSpeakers');
-                if (savedSpeakers) {
-                    speakers = JSON.parse(savedSpeakers);
-                    updateSpeakersList();
-                }
+            // Initialize speaker voices dropdown
+            function populateVoiceList() {
+                const voiceSelects = document.querySelectorAll('.profile-voice');
                 
-                const savedRecordings = localStorage.getItem('voicenoteRecordings');
-                if (savedRecordings) {
-                    recordings = JSON.parse(savedRecordings);
-                    updateRecordingsList();
-                }
+                // Add some sample voice profiles
+                const voiceProfiles = [
+                    'Default Voice Profile', 
+                    'Deep Male Voice', 
+                    'High Female Voice',
+                    'Neutral Voice',
+                    'British Accent',
+                    'American Accent'
+                ];
+                
+                voiceSelects.forEach(select => {
+                    // Clear existing options first
+                    while(select.firstChild) {
+                        select.removeChild(select.firstChild);
+                    }
+                    
+                    // Add voice profiles
+                    voiceProfiles.forEach((profile, index) => {
+                        const option = document.createElement('option');
+                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
+                        option.textContent = profile;
+                        select.appendChild(option);
+                    });
+                });
             }
             
-            // Save data to local storage
-            function saveDataToStorage() {
-                localStorage.setItem('voicenoteSpeakers', JSON.stringify(speakers));
-                localStorage.setItem('voicenoteRecordings', JSON.stringify(recordings));
+            // Add a new speaker profile
+            function addSpeakerProfile() {
+                const newIndex = speakerProfiles.length + 1;
+                const profileRow = document.createElement('div');
+                profileRow.className = 'profile-row';
+                profileRow.innerHTML = `
+                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
+                    <select class="profile-voice">
+                        <option value="default">Default Voice Profile</option>
+                    </select>
+                `;
+                
+                profileList.appendChild(profileRow);
+                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
+                
+                // Update the voice options
+                populateVoiceList();
+                
+                // Update event listeners for the new inputs
+                updateProfileEventListeners();
             }
             
-            // Add a new speaker
-            function addSpeaker() {
-                const name = newSpeakerName.value.trim();
-                if (!name) {
-                    showToast('Please enter a speaker name', 'error');
-                    return;
-                }
+            // Update speaker profiles when inputs change
+            function updateProfileEventListeners() {
+                const nameInputs = document.querySelectorAll('.profile-name');
+                const voiceSelects = document.querySelectorAll('.profile-voice');
                 
-                const speakerId = `speaker-${speakers.length + 1}`;
-                speakers.push({
-                    name: name,
-                    id: speakerId
+                nameInputs.forEach((input, index) => {
+                    input.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].name = input.value;
+                        }
+                    });
                 });
                 
-                updateSpeakersList();
-                saveDataToStorage();
-                
-                newSpeakerName.value = '';
-                showToast(`Speaker "${name}" added`, 'success');
-            }
-            
-            // Update the speakers dropdown
-            function updateSpeakersList() {
-                // Clear existing options
-                speakerSelect.innerHTML = '';
-                
-                // Add all speakers
-                speakers.forEach(speaker => {
-                    const option = document.createElement('option');
-                    option.value = speaker.id;
-                    option.textContent = speaker.name;
-                    speakerSelect.appendChild(option);
+                voiceSelects.forEach((select, index) => {
+                    select.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].voice = select.value;
+                        }
+                    });
                 });
             }
             
             // Start recording function
             function startRecording() {
-                // Request access to microphone
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        currentStreamRef = stream;
-                        
-                        // Start speech recognition
-                        try {
-                            recognition.start();
-                            
-                            // Also start recording audio
-                            mediaRecorder = new MediaRecorder(stream);
-                            audioChunks = [];
-                            
-                            mediaRecorder.ondataavailable = (event) => {
-                                audioChunks.push(event.data);
-                            };
-                            
-                            mediaRecorder.onstop = () => {
-                                // Create blob from recorded chunks
-                                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                                currentAudioBlob = audioBlob;
+                try {
+                    // Request microphone permission first
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(stream => {
+                            // Once we have microphone permission, start recognition
+                            try {
+                                recognition.start();
+                                isRecording = true;
+                                status.classList.add('status-recording');
+                                statusText.textContent = 'Recording...';
+                                recordBtn.disabled = true;
+                                stopBtn.disabled = false;
                                 
-                                // Open save modal
-                                openSaveModal();
-                            };
-                            
-                            mediaRecorder.start();
-                            
-                            // Update UI
-                            isRecording = true;
-                            document.body.classList.add('recording');
-                            statusText.textContent = 'Recording...';
-                            recordBtn.disabled = true;
-                            stopBtn.disabled = false;
-                            
-                        } catch (recognitionError) {
-                            console.error('Error starting recognition:', recognitionError);
-                            statusText.textContent = 'Error starting recognition';
-                            showToast('Failed to start speech recognition', 'error');
-                            
-                            // Stop the media stream since recognition failed
-                            stream.getTracks().forEach(track => track.stop());
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error accessing microphone:', err);
-                        showToast('Microphone access denied', 'error');
-                        statusText.textContent = 'Microphone access denied';
-                    });
+                                // Close the stream as we don't need it directly
+                                stream.getTracks().forEach(track => track.stop());
+                            } catch (recognitionError) {
+                                console.error('Error starting recognition:', recognitionError);
+                                statusText.textContent = 'Error starting recognition';
+                            }
+                        })
+                        .catch(micError => {
+                            console.error('Microphone permission denied:', micError);
+                            statusText.textContent = 'Microphone permission denied';
+                            alert("You need to allow microphone access to use the voice transcription feature.");
+                        });
+                } catch (error) {
+                    console.error('Error requesting microphone:', error);
+                    statusText.textContent = 'Error requesting microphone';
+                }
             }
             
             // Stop recording function
             function stopRecording() {
-                if (recognition) {
-                    recognition.stop();
-                }
-                
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                }
-                
-                if (currentStreamRef) {
-                    currentStreamRef.getTracks().forEach(track => track.stop());
-                }
-                
+                recognition.stop();
                 isRecording = false;
-                document.body.classList.remove('recording');
+                status.classList.remove('status-recording');
                 statusText.textContent = 'Recording stopped';
                 recordBtn.disabled = false;
                 stopBtn.disabled = true;
@@ -1028,16 +462,17 @@
                 
                 // Add final transcript to segments with current speaker
                 if (finalTranscript) {
-                    const currentSpeaker = speakers[currentSpeakerIndex];
-                    const speakerName = currentSpeaker.name;
-                    const speakerId = currentSpeaker.id;
+                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
                     
                     transcriptSegments.push({
                         speaker: speakerName,
-                        speakerId: speakerId,
-                        text: finalTranscript.trim(),
-                        timestamp: new Date().toISOString()
+                        speakerClass: speakerClass,
+                        text: finalTranscript.trim()
                     });
+                    
+                    // Cycle to next speaker for the next segment
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
                 }
                 
                 // Update display
@@ -1050,15 +485,14 @@
                 
                 // Add all transcript segments
                 transcriptSegments.forEach(segment => {
-                    // Extract speaker class (speaker-1, speaker-2, etc.)
-                    const speakerClass = segment.speakerId;
-                    html += `<p><span class="speaker ${speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
                 });
                 
                 // Add interim text if available
                 if (interimText) {
-                    const currentSpeaker = speakers[currentSpeakerIndex];
-                    html += `<p><span class="speaker ${currentSpeaker.id}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
                 }
                 
                 transcript.innerHTML = html;
@@ -1067,354 +501,96 @@
                 transcript.scrollTop = transcript.scrollHeight;
             }
             
-            // Open save modal
-            function openSaveModal() {
-                saveModal.classList.add('open');
-                recordingTitle.focus();
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                let fullText = '';
                 
-                // Generate default title with date
-                const now = new Date();
-                const formattedDate = now.toLocaleDateString();
-                const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                recordingTitle.value = `Recording ${formattedDate} ${formattedTime}`;
-            }
-            
-            // Close save modal
-            function closeSaveModal() {
-                saveModal.classList.remove('open');
-            }
-            
-            // Save recording
-            function saveRecording() {
-                const title = recordingTitle.value.trim() || `Recording ${new Date().toLocaleString()}`;
-                
-                if (!currentAudioBlob) {
-                    showToast('No recording to save', 'error');
-                    closeSaveModal();
-                    return;
-                }
-                
-                // Create object URL for the audio blob
-                const audioURL = URL.createObjectURL(currentAudioBlob);
-                
-                // Create new recording object
-                const newRecording = {
-                    id: Date.now().toString(),
-                    title: title,
-                    date: new Date().toISOString(),
-                    audioURL: audioURL,
-                    transcript: transcriptSegments,
-                    duration: calculateDuration(transcriptSegments)
-                };
-                
-                // Add to recordings array
-                recordings.push(newRecording);
-                
-                // Update UI
-                updateRecordingsList();
-                
-                // Save to local storage (we need to store a serializable version)
-                const serializableRecordings = recordings.map(rec => {
-                    // We need to store the blob itself as it can't be serialized directly
-                    // In a real app, you might use IndexedDB for blob storage
-                    return {
-                        ...rec,
-                        audioBlob: currentAudioBlob // This won't be serialized, but we need it temporarily
-                    };
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
                 });
                 
-                localStorage.setItem('voicenoteRecordings', JSON.stringify(serializableRecordings));
-                
-                // Show notification
-                showToast(`Recording "${title}" saved`, 'success');
-                
-                // Clear current transcript and reset for new recording
-                transcriptSegments = [];
-                updateTranscriptDisplay();
-                
-                closeSaveModal();
-            }
-            
-            // Calculate recording duration from transcript segments
-            function calculateDuration(segments) {
-                if (segments.length === 0) return '0:00';
-                
-                // For a more accurate duration, we would use the actual audio duration
-                // This is a simplified estimate based on words
-                let totalWords = 0;
-                segments.forEach(segment => {
-                    totalWords += segment.text.split(/\s+/).length;
-                });
-                
-                // Estimate: average speaking rate is about 150 words per minute
-                const minutes = Math.floor(totalWords / 150);
-                const seconds = Math.floor((totalWords % 150) / 2.5);
-                
-                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            // Update recordings list
-            function updateRecordingsList() {
-                recordingsList.innerHTML = '';
-                
-                if (recordings.length === 0) {
-                    recordingsCount.textContent = 'No recordings';
-                    return;
-                }
-                
-                recordingsCount.textContent = `${recordings.length} recording${recordings.length !== 1 ? 's' : ''}`;
-                
-                // Sort recordings by date (newest first)
-                recordings.sort((a, b) => new Date(b.date) - new Date(a.date));
-                
-                recordings.forEach(recording => {
-                    const li = document.createElement('li');
-                    li.className = 'recording-card';
-                    
-                    // Format date
-                    const recordingDate = new Date(recording.date);
-                    const formattedDate = recordingDate.toLocaleDateString();
-                    const formattedTime = recordingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    
-                    li.innerHTML = `
-                        <div class="recording-info">
-                            <h3 class="recording-title">${recording.title}</h3>
-                            <div class="recording-meta">
-                                <span>${formattedDate} ${formattedTime}</span>
-                                <span>${recording.duration}</span>
-                            </div>
-                        </div>
-                        <div class="recording-controls">
-                            <button class="recording-btn play-btn" data-id="${recording.id}">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                                </svg>
-                                Play
-                            </button>
-                            <button class="recording-btn download-btn" data-id="${recording.id}">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                Download
-                            </button>
-                            <button class="recording-btn delete-btn" data-id="${recording.id}">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                                Delete
-                            </button>
-                        </div>
-                    `;
-                    
-                    recordingsList.appendChild(li);
-                });
-                
-                // Add event listeners
-                document.querySelectorAll('.play-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const recordingId = btn.getAttribute('data-id');
-                        playRecording(recordingId);
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        statusText.textContent = 'Transcript copied to clipboard';
+                        setTimeout(() => {
+                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
                     });
-                });
-                
-                document.querySelectorAll('.download-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const recordingId = btn.getAttribute('data-id');
-                        downloadRecording(recordingId);
-                    });
-                });
-                
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const recordingId = btn.getAttribute('data-id');
-                        deleteRecording(recordingId);
-                    });
-                });
             }
             
-            // Play recording
-            function playRecording(id) {
-                const recording = recordings.find(r => r.id === id);
-                if (!recording) return;
+            // Download transcript as text file
+            function downloadTranscript() {
+                let fullText = '';
                 
-                // Create audio element
-                const audio = new Audio(recording.audioURL);
-                audio.play();
-            }
-            
-            // Download recording
-            function downloadRecording(id) {
-                const recording = recordings.find(r => r.id === id);
-                if (!recording) return;
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
                 
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = recording.audioURL;
-                a.download = `${recording.title.replace(/\s+/g, '_')}.mp3`;
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
                 document.body.appendChild(a);
                 a.click();
-                document.body.removeChild(a);
-            }
-            
-            // Delete recording
-            function deleteRecording(id) {
-                const recordingIndex = recordings.findIndex(r => r.id === id);
-                if (recordingIndex === -1) return;
                 
-                // Revoke object URL to free memory
-                URL.revokeObjectURL(recordings[recordingIndex].audioURL);
-                
-                // Remove from array
-                recordings.splice(recordingIndex, 1);
-                
-                // Update UI and storage
-                updateRecordingsList();
-                saveDataToStorage();
-                
-                showToast('Recording deleted', 'success');
-            }
-            
-            // Show toast notification
-            function showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                
-                let iconSvg = '';
-                if (type === 'success') {
-                    iconSvg = `<svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>`;
-                } else {
-                    iconSvg = `<svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>`;
-                }
-                
-                toast.innerHTML = `
-                    ${iconSvg}
-                    <div class="toast-message">${message}</div>
-                    <button class="toast-close">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                `;
-                
-                toastContainer.appendChild(toast);
-                
-                // Close on click
-                toast.querySelector('.toast-close').addEventListener('click', () => {
-                    toast.style.animation = 'slideOut 0.3s forwards';
-                    setTimeout(() => {
-                        toastContainer.removeChild(toast);
-                    }, 300);
-                });
-                
-                // Auto-close after 5 seconds
+                // Cleanup
                 setTimeout(() => {
-                    if (toastContainer.contains(toast)) {
-                        toast.style.animation = 'slideOut 0.3s forwards';
-                        setTimeout(() => {
-                            if (toastContainer.contains(toast)) {
-                                toastContainer.removeChild(toast);
-                            }
-                        }, 300);
-                    }
-                }, 5000);
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
             }
             
-            // Handle keyboard events for switching speakers
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadBtn.addEventListener('click', downloadTranscript);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            
+            // Manually cycle through speakers (for demo/testing)
             document.addEventListener('keydown', (e) => {
-                // Tab key to switch speakers
                 if (e.key === 'Tab' && isRecording) {
                     e.preventDefault();
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakers.length;
-                    speakerSelect.selectedIndex = currentSpeakerIndex;
-                    statusText.textContent = `Switched to ${speakers[currentSpeakerIndex].name}`;
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
                     
                     setTimeout(() => {
                         statusText.textContent = 'Recording...';
                     }, 1500);
                 }
             });
-            
-            // Recognition error handler
-            recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
-                
-                if (event.error === 'no-speech') {
-                    statusText.textContent = "No speech detected";
-                } else if (event.error === 'aborted') {
-                    statusText.textContent = "Recognition aborted";
-                } else if (event.error === 'audio-capture') {
-                    statusText.textContent = "No microphone detected";
-                    showToast('No microphone detected', 'error');
-                } else if (event.error === 'not-allowed') {
-                    statusText.textContent = "Microphone access denied";
-                    showToast('Microphone access denied', 'error');
-                } else if (event.error === 'network') {
-                    statusText.textContent = "Network error";
-                    showToast('Network error occurred', 'error');
-                } else {
-                    statusText.textContent = `Error: ${event.error}`;
-                    showToast(`Recognition error: ${event.error}`, 'error');
-                }
-                
-                stopRecording();
-            };
-            
-            // Recognition end handler
-            recognition.onend = () => {
-                if (isRecording) {
-                    // Try to restart if we're still supposed to be recording
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.error('Failed to restart recognition after onend:', e);
-                        stopRecording();
-                    }
-                }
-            };
-            
-            // Event Listeners
-            recordBtn.addEventListener('click', startRecording);
-            stopBtn.addEventListener('click', stopRecording);
-            addSpeakerBtn.addEventListener('click', addSpeaker);
-            saveRecordingBtn.addEventListener('click', saveRecording);
-            cancelSaveBtn.addEventListener('click', closeSaveModal);
-            closeModalBtn.addEventListener('click', closeSaveModal);
-            
-            // Handle speaker selection change
-            speakerSelect.addEventListener('change', () => {
-                // Find the index of the selected speaker
-                const selectedId = speakerSelect.value;
-                const selectedIndex = speakers.findIndex(s => s.id === selectedId);
-                if (selectedIndex !== -1) {
-                    currentSpeakerIndex = selectedIndex;
-                }
-            });
-            
-            // Enter key on new speaker input
-            newSpeakerName.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addSpeaker();
-                }
-            });
-            
-            // Enter key on recording title
-            recordingTitle.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    saveRecording();
-                }
-            });
-            
-            // Initial setup
-            loadSavedData();
+        });
+    </script>
+</body>
+</html>
