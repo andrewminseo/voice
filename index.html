@@ -5,71 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Transcription</title>
     <style>
-        /* Theme Variables */
         :root {
-            /* Light Mode (Default) */
+            /* Default theme (Light) */
             --primary-color: #4a6fa5;
             --secondary-color: #166088;
-            --background-color: #f0f5f9;
-            --surface-color: #ffffff;
-            --text-color: #1e2022;
+            --light-color: #f0f5f9;
+            --dark-color: #1e2022;
             --accent-color: #47b8e0;
             --error-color: #e74c3c;
             --success-color: #2ecc71;
-            --container-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transcript-bg: #fafafa;
-            --transcript-border: #ddd;
+            --background-color: #f0f5f9;
+            --container-background: white;
+            --text-color: #1e2022;
+            --border-color: #ddd;
+            --transcript-background: #fafafa;
         }
         
-        /* Dark Mode */
-        [data-theme="dark"] {
-            --primary-color: #6d9eeb;
-            --secondary-color: #4285f4;
-            --background-color: #121212;
-            --surface-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #64b5f6;
-            --error-color: #e57373;
-            --success-color: #81c784;
-            --container-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            --transcript-bg: #2d2d2d;
-            --transcript-border: #444;
+        /* Dark theme */
+        .dark-theme {
+            --primary-color: #6c90c0;
+            --secondary-color: #3d8bb3;
+            --light-color: #2c3e50;
+            --dark-color: #ecf0f1;
+            --accent-color: #5dade2;
+            --background-color: #1a1a1a;
+            --container-background: #2c3e50;
+            --text-color: #ecf0f1;
+            --border-color: #34495e;
+            --transcript-background: #34495e;
         }
         
-        /* Blue Light Filter Mode */
-        [data-theme="blue-light"] {
-            --primary-color: #7a5e3a;
-            --secondary-color: #8d6e42;
-            --background-color: #f9ebd2;
-            --surface-color: #f5e2bc;
-            --text-color: #4e3c10;
-            --accent-color: #d3a95c;
-            --error-color: #b5644f;
-            --success-color: #7d9b4e;
-            --container-shadow: 0 4px 6px rgba(160, 120, 50, 0.15);
-            --transcript-bg: #f0dbb5;
-            --transcript-border: #d6c08e;
+        /* Blue light filter theme */
+        .blue-light-theme {
+            --primary-color: #a97142;
+            --secondary-color: #88542f;
+            --light-color: #fff1e0;
+            --dark-color: #3d2c20;
+            --accent-color: #c99a6e;
+            --background-color: #fff1e0;
+            --container-background: #fff8ee;
+            --text-color: #3d2c20;
+            --border-color: #d9c6b0;
+            --transcript-background: #ffeddb;
+            filter: sepia(30%) brightness(95%);
         }
         
-        /* Discreet Mode */
-        [data-theme="discreet"] {
-            --primary-color: #9e9e9e;
-            --secondary-color: #757575;
+        /* Discrete theme */
+        .discrete-theme {
+            --primary-color: #868686;
+            --secondary-color: #6d6d6d;
+            --light-color: #f5f5f5;
+            --dark-color: #333333;
+            --accent-color: #b0b0b0;
             --background-color: #f5f5f5;
-            --surface-color: #eeeeee;
-            --text-color: #424242;
-            --accent-color: #bdbdbd;
-            --error-color: #a5a5a5;
-            --success-color: #9e9e9e;
-            --container-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --transcript-bg: #f0f0f0;
-            --transcript-border: #e0e0e0;
+            --container-background: #f9f9f9;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --transcript-background: #f0f0f0;
         }
         
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s, color 0.3s;
         }
         
         body {
@@ -78,7 +77,6 @@
             color: var(--text-color);
             background-color: var(--background-color);
             padding: 20px;
-            transition: all 0.3s ease;
         }
         
         header {
@@ -94,55 +92,10 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background-color: var(--surface-color);
+            background-color: var(--container-background);
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: var(--container-shadow);
-            transition: all 0.3s ease;
-        }
-        
-        .theme-switcher {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            border-radius: 30px;
-            background-color: var(--background-color);
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .theme-option {
-            flex: 1;
-            padding: 10px 5px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            z-index: 2;
-            user-select: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        .slider {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25%;
-            height: 100%;
-            background-color: var(--primary-color);
-            border-radius: 30px;
-            transition: transform 0.3s ease;
-            z-index: 1;
-        }
-        
-        .theme-option.active {
-            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         .controls {
@@ -166,15 +119,18 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+        }
+        
+        .btn-primary {
             background-color: var(--primary-color);
             color: white;
         }
         
-        .btn:hover {
+        .btn-primary:hover {
             background-color: var(--secondary-color);
         }
         
-        .btn:disabled {
+        .btn-primary:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
@@ -185,7 +141,7 @@
         }
         
         .btn-danger:hover {
-            opacity: 0.9;
+            background-color: #c0392b;
         }
         
         .icon {
@@ -199,19 +155,19 @@
         
         .transcript-container {
             margin-top: 2rem;
-            border: 1px solid var(--transcript-border);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 1rem;
             min-height: 300px;
             max-height: 60vh;
             overflow-y: auto;
-            background-color: var(--transcript-bg);
-            transition: all 0.3s ease;
+            background-color: var(--transcript-background);
         }
         
         .transcript-text {
             white-space: pre-wrap;
             line-height: 1.7;
+            color: var(--text-color);
         }
         
         .speaker {
@@ -262,10 +218,10 @@
         
         input, select {
             padding: 8px 12px;
-            border: 1px solid var(--transcript-border);
+            border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 0.9rem;
-            background-color: var(--surface-color);
+            background-color: var(--container-background);
             color: var(--text-color);
         }
         
@@ -280,7 +236,7 @@
         }
         
         .add-profile:hover {
-            opacity: 0.9;
+            background-color: #27ae60;
         }
         
         .export-options {
@@ -295,34 +251,163 @@
             font-size: 0.9rem;
         }
         
-        .audio-recording {
-            margin-top: 0.5rem;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
-        }
-        
-        .clip {
+        /* Theme switcher styles */
+        .theme-switcher {
+            margin: 1rem 0;
             padding: 1rem;
+            background-color: var(--container-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-switcher h3 {
             margin-bottom: 1rem;
-            border-radius: 5px;
-            background-color: var(--surface-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            position: relative;
+            color: var(--secondary-color);
         }
         
-        .clip button {
-            background-color: var(--error-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .slider-label {
+            text-align: center;
             font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 5px;
+            flex: 1;
+            color: var(--text-color);
         }
         
-        .clip button:hover {
-            opacity: 0.9;
+        .theme-slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, 
+                var(--light-color) 0%, 
+                var(--accent-color) 33%, 
+                var(--primary-color) 66%, 
+                var(--dark-color) 100%);
+            outline: none;
+            border-radius: 10px;
+        }
+        
+        .theme-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .theme-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Grammar correction toggle */
+        .feature-toggle {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .feature-toggle label {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--success-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Grammar correction indicator */
+        .grammar-correction {
+            color: var(--success-color);
+            text-decoration: underline;
+            cursor: help;
+        }
+        
+        /* Audio recordings list */
+        .recordings-list {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+        
+        .recordings-list h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .recording-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .recording-info {
+            flex: 1;
+        }
+        
+        .recording-actions {
+            display: flex;
+            gap: 5px;
         }
         
         @keyframes pulse {
@@ -350,15 +435,6 @@
             .export-options {
                 flex-direction: column;
             }
-            
-            .theme-switcher {
-                max-width: 100%;
-            }
-            
-            .theme-option {
-                font-size: 0.8rem;
-                padding: 8px 4px;
-            }
         }
     </style>
 </head>
@@ -370,11 +446,24 @@
         </header>
         
         <div class="theme-switcher">
-            <div class="slider"></div>
-            <div class="theme-option active" data-theme="light">Light Mode</div>
-            <div class="theme-option" data-theme="dark">Dark Mode</div>
-            <div class="theme-option" data-theme="blue-light">Blue Light Filter</div>
-            <div class="theme-option" data-theme="discreet">Discreet Mode</div>
+            <h3>Interface Mode</h3>
+            <div class="slider-container">
+                <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
+                <div class="slider-labels">
+                    <span class="slider-label">Standard</span>
+                    <span class="slider-label">Blue Light Filter</span>
+                    <span class="slider-label">Discrete</span>
+                    <span class="slider-label">Dark</span>
+                </div>
+            </div>
+            
+            <div class="feature-toggle">
+                <label for="grammarToggle">Grammar Correction:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="grammarToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
         </div>
         
         <div class="status">
@@ -437,8 +526,13 @@
                     <circle cx="6" cy="18" r="3"></circle>
                     <circle cx="18" cy="16" r="3"></circle>
                 </svg>
-                Download MP3
+                Download Audio
             </button>
+        </div>
+        
+        <div class="recordings-list">
+            <h3>Saved Recordings</h3>
+            <div id="savedRecordings"></div>
         </div>
     </div>
 
@@ -455,39 +549,29 @@
             const downloadAudioBtn = document.getElementById('downloadAudioBtn');
             const addProfileBtn = document.getElementById('addProfile');
             const profileList = document.querySelector('.profile-list');
-            const themeOptions = document.querySelectorAll('.theme-option');
-            const themeSlider = document.querySelector('.slider');
+            const themeSlider = document.getElementById('themeSlider');
+            const grammarToggle = document.getElementById('grammarToggle');
+            const savedRecordings = document.getElementById('savedRecordings');
             
-            // Theme switcher
-            themeOptions.forEach((option, index) => {
-                option.addEventListener('click', () => {
-                    // Update active state
-                    themeOptions.forEach(opt => opt.classList.remove('active'));
-                    option.classList.add('active');
-                    
-                    // Move slider
-                    themeSlider.style.transform = `translateX(${index * 100}%)`;
-                    
-                    // Apply theme
-                    document.body.setAttribute('data-theme', option.getAttribute('data-theme'));
-                    
-                    // Save theme preference in cookies
-                    setCookie('theme', option.getAttribute('data-theme'), 365);
-                });
-            });
-            
-            // Load saved theme preference
-            const savedTheme = getCookie('theme');
-            if (savedTheme) {
-                document.body.setAttribute('data-theme', savedTheme);
-                themeOptions.forEach((option, index) => {
-                    if (option.getAttribute('data-theme') === savedTheme) {
-                        themeOptions.forEach(opt => opt.classList.remove('active'));
-                        option.classList.add('active');
-                        themeSlider.style.transform = `translateX(${index * 100}%)`;
-                    }
-                });
-            }
+            // Grammar correction dictionary (Simple example)
+            const grammarCorrections = {
+                "i ": "I ",
+                "i'm": "I'm",
+                "dont": "don't",
+                "cant": "can't",
+                "wont": "won't",
+                "im ": "I'm ",
+                "ive": "I've",
+                "youre": "you're",
+                "theyre": "they're",
+                "thier": "their",
+                " i ": " I ",
+                "gonna": "going to",
+                "wanna": "want to",
+                "kinda": "kind of",
+                "sorta": "sort of",
+                "alot": "a lot",
+            };
             
             // Speech Recognition Setup
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
@@ -508,15 +592,13 @@
             recognition.lang = 'en-US';
             recognition.maxAlternatives = 3;
             
-            // Audio Recording Setup
-            let mediaRecorder;
-            let audioChunks = [];
-            
             // State variables
             let isRecording = false;
             let currentSpeakerIndex = 0;
             let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
             let transcriptSegments = [];
+            let audioChunks = [];
+            let mediaRecorder = null;
             
             // Initialize speaker voices dropdown
             function populateVoiceList() {
@@ -592,6 +674,27 @@
                 });
             }
             
+            // Apply grammar correction
+            function correctGrammar(text) {
+                if (!grammarToggle.checked) return text;
+                
+                let correctedText = ' ' + text + ' '; // Add spaces for matching whole words
+                
+                // Apply corrections
+                Object.keys(grammarCorrections).forEach(error => {
+                    const regex = new RegExp(error, 'gi');
+                    correctedText = correctedText.replace(regex, grammarCorrections[error]);
+                });
+                
+                // Basic capitalization for sentences
+                correctedText = correctedText.replace(/(?<=^|[.!?]\s+)[a-z]/g, match => match.toUpperCase());
+                
+                // Remove extra spaces we added
+                correctedText = correctedText.trim();
+                
+                return correctedText;
+            }
+            
             // Start recording function
             function startRecording() {
                 try {
@@ -601,18 +704,28 @@
                             // Once we have microphone permission, start recognition
                             try {
                                 recognition.start();
-                                
-                                // Initialize MediaRecorder for audio recording
-                                setupMediaRecorder(stream);
-                                mediaRecorder.start(1000); // Collect data in 1-second chunks
-                                
-                                audioChunks = [];
-                                
                                 isRecording = true;
                                 status.classList.add('status-recording');
                                 statusText.textContent = 'Recording...';
                                 recordBtn.disabled = true;
                                 stopBtn.disabled = false;
+                                
+                                // Create media recorder for audio recording
+                                mediaRecorder = new MediaRecorder(stream);
+                                mediaRecorder.ondataavailable = (event) => {
+                                    if (event.data.size > 0) {
+                                        audioChunks.push(event.data);
+                                    }
+                                };
+                                
+                                mediaRecorder.start();
+                                
+                                mediaRecorder.onstop = () => {
+                                    // Save audio recording
+                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                                    saveRecording(audioBlob);
+                                    audioChunks = [];
+                                };
                             } catch (recognitionError) {
                                 console.error('Error starting recognition:', recognitionError);
                                 statusText.textContent = 'Error starting recognition';
@@ -631,12 +744,11 @@
             
             // Stop recording function
             function stopRecording() {
-                recognition.stop();
-                
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
                     mediaRecorder.stop();
                 }
                 
+                recognition.stop();
                 isRecording = false;
                 status.classList.remove('status-recording');
                 statusText.textContent = 'Recording stopped';
@@ -644,315 +756,104 @@
                 stopBtn.disabled = true;
             }
             
-            // Handle recognition results
-            recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
+            // Save recording to cookies and display in recordings list
+            function saveRecording(audioBlob) {
+                const recordingId = 'recording_' + Date.now();
+                const recordingName = `Recording ${new Date().toLocaleString()}`;
+                const audioUrl = URL.createObjectURL(audioBlob);
                 
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        finalTranscript += result[0].transcript;
-                    } else {
-                        interimTranscript += result[0].transcript;
-                    }
-                }
+                // Create HTML for recording
+                const recordingItem = document.createElement('div');
+                recordingItem.className = 'recording-item';
+                recordingItem.innerHTML = `
+                    <div class="recording-info">
+                        <p>${recordingName}</p>
+                    </div>
+                    <div class="recording-actions">
+                        <audio src="${audioUrl}" controls></audio>
+                        <button class="btn-sm btn-primary download-recording" data-id="${recordingId}">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                    </div>
+                `;
                 
-                // Add final transcript to segments with current speaker
-                if (finalTranscript) {
-                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    transcriptSegments.push({
-                        speaker: speakerName,
-                        speakerClass: speakerClass,
-                        text: finalTranscript.trim()
-                    });
-                    
-                    // Save transcript segment to cookies
-                    saveTranscriptSegment(speakerName, finalTranscript.trim());
-                    
-                    // Cycle to next speaker for the next segment
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                }
+                savedRecordings.appendChild(recordingItem);
                 
-                // Update display
-                updateTranscriptDisplay(interimTranscript);
+                // Save to IndexedDB (more reliable than cookies for binary data)
+                saveToIndexedDB(recordingId, audioBlob, recordingName);
+                
+                // Add event listener for download button
+                recordingItem.querySelector('.download-recording').addEventListener('click', () => {
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = `${recordingName}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+            
+            // IndexedDB setup for saving recordings
+            let db;
+            const request = indexedDB.open('RecordingsDB', 1);
+            
+            request.onerror = (event) => {
+                console.error('Error opening IndexedDB:', event.target.error);
             };
             
-            // Update the transcript display
-            function updateTranscriptDisplay(interimText = '') {
-                let html = '';
-                
-                // Add all transcript segments
-                transcriptSegments.forEach(segment => {
-                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
-                });
-                
-                // Add interim text if available
-                if (interimText) {
-                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                if (!db.objectStoreNames.contains('recordings')) {
+                    db.createObjectStore('recordings', { keyPath: 'id' });
                 }
+            };
+            
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                loadSavedRecordings();
+            };
+            
+            // Save recording to IndexedDB
+            function saveToIndexedDB(id, blob, name) {
+                if (!db) return;
                 
-                transcript.innerHTML = html;
+                const transaction = db.transaction(['recordings'], 'readwrite');
+                const store = transaction.objectStore('recordings');
+                const recording = {
+                    id: id,
+                    blob: blob,
+                    name: name,
+                    date: new Date().toISOString()
+                };
                 
-                // Scroll to bottom
-                transcript.scrollTop = transcript.scrollHeight;
+                store.add(recording);
             }
             
-            // Save transcript segment to cookies
-            function saveTranscriptSegment(speaker, text) {
-                const segments = getTranscriptSegments();
-                segments.push({ speaker, text, timestamp: new Date().toISOString() });
+            // Load saved recordings from IndexedDB
+            function loadSavedRecordings() {
+                if (!db) return;
                 
-                // Save to cookie (limited storage)
-                setCookie('transcriptSegments', JSON.stringify(segments), 30);
-            }
-            
-            // Get transcript segments from cookies
-            function getTranscriptSegments() {
-                const segments = getCookie('transcriptSegments');
-                return segments ? JSON.parse(segments) : [];
-            }
-            
-            // Load transcript segments from cookies
-            function loadTranscriptSegments() {
-                const savedSegments = getTranscriptSegments();
+                const transaction = db.transaction(['recordings'], 'readonly');
+                const store = transaction.objectStore('recordings');
+                const request = store.getAll();
                 
-                if (savedSegments.length > 0) {
-                    savedSegments.forEach((segment, index) => {
-                        transcriptSegments.push({
-                            speaker: segment.speaker,
-                            speakerClass: `speaker-${(index % 3) + 1}`,
-                            text: segment.text
-                        });
-                    });
-                    
-                    updateTranscriptDisplay();
-                }
-            }
-            
-            // Cookie Utility Functions
-            function setCookie(name, value, days) {
-                const expires = new Date();
-                expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-                document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-            }
-            
-            function getCookie(name) {
-                const nameEQ = `${name}=`;
-                const ca = document.cookie.split(';');
-                for (let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
-            }
-            
-            // Export functions
-            function copyTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                navigator.clipboard.writeText(fullText)
-                    .then(() => {
-                        statusText.textContent = 'Transcript copied to clipboard';
-                        setTimeout(() => {
-                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text: ', err);
-                    });
-            }
-            
-            function downloadTranscriptText() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                const blob = new Blob([fullText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            function downloadAudio() {
-                if (audioChunks.length === 0) {
-                    alert('No audio recording available.');
-                    return;
-                }
-                
-                // We'll use the WebM format as it's widely supported
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const url = URL.createObjectURL(audioBlob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `recording-${new Date().toISOString().slice(0, 10)}.webm`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-                
-                statusText.textContent = 'Audio downloaded successfully';
-                setTimeout(() => {
-                    statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                }, 2000);
-            }
-            
-            // Function to list past recordings from localStorage
-            function displaySavedRecordings() {
-                const recordings = JSON.parse(localStorage.getItem('audioRecordings') || '[]');
-                
-                if (recordings.length > 0) {
-                    const container = document.createElement('div');
-                    container.className = 'saved-recordings';
-                    
-                    const header = document.createElement('h3');
-                    header.textContent = 'Previous Recordings';
-                    container.appendChild(header);
-                    
-                    recordings.forEach((recording, index) => {
+                request.onsuccess = (event) => {
+                    const recordings = event.target.result;
+                    recordings.forEach(recording => {
+                        const audioUrl = URL.createObjectURL(recording.blob);
+                        
                         const recordingItem = document.createElement('div');
-                        recordingItem.className = 'clip';
-                        
-                        const date = new Date(recording.timestamp);
-                        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                        
-                        const audioEl = document.createElement('audio');
-                        audioEl.controls = true;
-                        audioEl.src = recording.blobURL;
-                        
-                        const label = document.createElement('p');
-                        label.textContent = `Recording ${index + 1} - ${formattedDate}`;
-                        
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.textContent = 'Delete';
-                        deleteBtn.addEventListener('click', () => {
-                            // Remove from list
-                            recordings.splice(index, 1);
-                            localStorage.setItem('audioRecordings', JSON.stringify(recordings));
-                            
-                            // Remove from UI
-                            if (recordingItem.parentNode) {
-                                recordingItem.parentNode.removeChild(recordingItem);
-                            }
-                            
-                            // If no more recordings, remove the container
-                            if (recordings.length === 0 && container.parentNode) {
-                                container.parentNode.removeChild(container);
-                            }
-                        });
-                        
-                        recordingItem.appendChild(audioEl);
-                        recordingItem.appendChild(label);
-                        recordingItem.appendChild(deleteBtn);
-                        container.appendChild(recordingItem);
-                    });
-                    
-                    // Add to DOM after transcript container
-                    const transcriptContainer = document.querySelector('.transcript-container');
-                    transcriptContainer.parentNode.insertBefore(container, transcriptContainer.nextSibling);
-                }
-            }
-            
-            // Event Listeners
-            recordBtn.addEventListener('click', startRecording);
-            stopBtn.addEventListener('click', stopRecording);
-            copyBtn.addEventListener('click', copyTranscript);
-            downloadTextBtn.addEventListener('click', downloadTranscriptText);
-            downloadAudioBtn.addEventListener('click', downloadAudio);
-            addProfileBtn.addEventListener('click', addSpeakerProfile);
-            
-            // Recognition event handlers
-            recognition.onend = () => {
-                if (isRecording) {
-                    // If still recording, restart recognition (it can time out)
-                    recognition.start();
-                }
-            };
-            
-            // MediaRecorder Functions
-            function setupMediaRecorder(stream) {
-                // Initialize MediaRecorder with appropriate format for MP3-compatible output
-                const options = { mimeType: 'audio/webm' };
-                mediaRecorder = new MediaRecorder(stream, options);
-                
-                // Set up event handlers
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-                
-                mediaRecorder.onstop = () => {
-                    // Create a blob from the recorded audio chunks
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    
-                    // Create an audio element to test playback
-                    const audioURL = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(audioURL);
-                    
-                    // Save recording information to localStorage instead of cookies (more storage space)
-                    const recordingId = 'recording-' + new Date().getTime();
-                    const recordings = JSON.parse(localStorage.getItem('audioRecordings') || '[]');
-                    
-                    recordings.push({
-                        id: recordingId,
-                        timestamp: new Date().toISOString(),
-                        duration: mediaRecorder.duration || 0,
-                        blobURL: audioURL
-                    });
-                    
-                    localStorage.setItem('audioRecordings', JSON.stringify(recordings));
-                    
-                    // Add a small notification that recording was saved
-                    const saveNotice = document.createElement('div');
-                    saveNotice.className = 'audio-recording';
-                    saveNotice.textContent = 'Audio recording saved. Available for download.';
-                    transcript.parentNode.appendChild(saveNotice);
-                    
-                    setTimeout(() => {
-                        if (saveNotice.parentNode) {
-                            saveNotice.parentNode.removeChild(saveNotice);
-                        }
-                    }, 5000);
-                };
-            
-                            // Recognition event handlers
-            recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
-                statusText.textContent = `Error: ${event.error}`;
-                stopRecording();
-                
-                // Show a more helpful message for common errors
-                if (event.error === 'not-allowed') {
-                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
-                } else if (event.error === 'no-speech') {
-                    statusText.textContent = "No speech detected. Please try again.";
-                } else if (event.error === 'network') {
-                    statusText.textContent = "Network error occurred. Please check your connection.";
-                }
+                        recordingItem.className = 'recording-item';
+                        recordingItem.innerHTML = `
+                            <div class="recording-info">
+                                <p>${recording.name}</p>
+                            </div>
+                            <div class="recording-actions">
+                                <audio src="${audioUrl}" controls></audio>
+                                <button class="btn-sm btn-primary download-recording" data-id="${recording.id}">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2
