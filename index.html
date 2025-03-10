@@ -945,4 +945,586 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
-            const themeBtn = document.
+            const themeBtn = document.getElementById('themeBtn');
+            const themeDropdown = document.getElementById('themeDropdown');
+            const themeOptions = document.querySelectorAll('.theme-option');
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const downloadTranscriptBtn = document.getElementById('downloadTranscriptBtn');
+            const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+            const addSpeakerBtn = document.getElementById('addSpeakerBtn');
+            const speakerModal = document.getElementById('speakerModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelSpeakerBtn = document.getElementById('cancelSpeakerBtn');
+            const saveSpeakerBtn = document.getElementById('saveSpeakerBtn');
+            const speakerNameInput = document.getElementById('speakerName');
+            const voiceProfileSelect = document.getElementById('voiceProfile');
+            const speakerList = document.getElementById('speakerList');
+            const transcriptContainer = document.getElementById('transcriptContainer');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // State variables
+            let isRecording = false;
+            let isPaused = false;
+            let currentSpeakerIndex = 0;
+            let speakerProfiles = [
+                { name: 'Speaker 1', voice: 'default', color: 'speaker-1' }
+            ];
+            let transcriptSegments = [];
+            let audioChunks = [];
+            let mediaRecorder = null;
+            let recognition = null;
+            
+            // Theme Switcher
+            themeBtn.addEventListener('click', () => {
+                themeDropdown.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!themeBtn.contains(e.target) && !themeDropdown.contains(e.target)) {
+                    themeDropdown.classList.remove('show');
+                }
+            });
+            
+            themeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const theme = option.getAttribute('data-theme');
+                    document.documentElement.setAttribute('data-theme', theme);
+                    
+                    // Update active state
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    // Save to localStorage
+                    localStorage.setItem('preferred-theme', theme);
+                    
+                    // Update theme button icon
+                    updateThemeIcon(theme);
+                    
+                    // Hide dropdown
+                    themeDropdown.classList.remove('show');
+                    
+                    // Show toast
+                    showToast('Theme updated', `Switched to ${theme.replace('-', ' ')} theme`, 'success');
+                });
+            });
+            
+            // Update theme icon based on current theme
+            function updateThemeIcon(theme) {
+                const iconElement = themeBtn.querySelector('i');
+                iconElement.className = ''; // Remove all classes
+                
+                switch(theme) {
+                    case 'dark':
+                        iconElement.className = 'fas fa-moon';
+                        break;
+                    case 'blue-light':
+                        iconElement.className = 'fas fa-eye';
+                        break;
+                    case 'discreet':
+                        iconElement.className = 'fas fa-low-vision';
+                        break;
+                    case 'covert':
+                        iconElement.className = 'fas fa-user-secret';
+                        break;
+                    default: // light
+                        iconElement.className = 'fas fa-sun';
+                }
+            }
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('preferred-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeOptions.forEach(option => {
+                if (option.getAttribute('data-theme') === savedTheme) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+            updateThemeIcon(savedTheme);
+            
+            // Setup Web Speech API
+            function setupSpeechRecognition() {
+                window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!window.SpeechRecognition) {
+                    showToast('Error', 'Speech recognition is not supported in your browser', 'error');
+                    recordBtn.disabled = true;
+                    statusText.textContent = 'Speech recognition not supported';
+                    return false;
+                }
+                
+                recognition = new window.SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
+                
+                recognition.onresult = handleRecognitionResult;
+                recognition.onerror = handleRecognitionError;
+                recognition.onend = handleRecognitionEnd;
+                
+                return true;
+            }
+            
+            // Handle recognition results
+            function handleRecognitionResult(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                // Add final transcript to segments with current speaker
+                if (finalTranscript) {
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const timestamp = new Date().toLocaleTimeString();
+                    
+                    transcriptSegments.push({
+                        speaker: currentSpeaker.name,
+                        speakerColor: currentSpeaker.color,
+                        text: finalTranscript.trim(),
+                        timestamp: timestamp
+                    });
+                    
+                    // Save to localStorage
+                    saveTranscriptToLocalStorage();
+                }
+                
+                // Update display
+                updateTranscriptDisplay(interimTranscript);
+            }
+            
+            // Handle recognition errors
+            function handleRecognitionError(event) {
+                console.error('Recognition error:', event.error);
+                
+                if (event.error === 'not-allowed') {
+                    showToast('Permission Error', 'Microphone access was denied', 'error');
+                    stopRecording();
+                } else if (event.error === 'audio-capture') {
+                    showToast('Hardware Error', 'No microphone was found', 'error');
+                    stopRecording();
+                } else {
+                    showToast('Recognition Error', `Error: ${event.error}`, 'error');
+                }
+            }
+            
+            // Handle recognition end
+            function handleRecognitionEnd() {
+                if (isRecording && !isPaused) {
+                    // Restart recognition if it ended but we're still recording
+                    recognition.start();
+                }
+            }
+            
+            // Update transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                if (transcriptSegments.length === 0 && !interimText) {
+                    html = '<div class="transcript-entry"><p class="transcript-text">No transcript available yet. Start recording to begin transcription.</p></div>';
+                } else {
+                    // Add all transcript segments
+                    transcriptSegments.forEach(segment => {
+                        html += `
+                            <div class="transcript-entry">
+                                <div class="speaker-label ${segment.speakerColor}">
+                                    <div class="speaker-color"></div>
+                                    <span>${segment.speaker}</span>
+                                </div>
+                                <p class="transcript-text">${segment.text}</p>
+                                <div class="timestamp">${segment.timestamp}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    // Add interim text if available
+                    if (interimText) {
+                        const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                        html += `
+                            <div class="transcript-entry">
+                                <div class="speaker-label ${currentSpeaker.color}">
+                                    <div class="speaker-color"></div>
+                                    <span>${currentSpeaker.name}</span>
+                                </div>
+                                <p class="transcript-text"><em>${interimText}</em></p>
+                            </div>
+                        `;
+                    }
+                }
+                
+                transcriptContainer.innerHTML = html;
+                
+                // Scroll to bottom
+                transcriptContainer.scrollTop = transcriptContainer.scrollHeight;
+            }
+            
+            // Setup MediaRecorder for audio recording
+            function setupMediaRecorder() {
+                // Request microphone access
+                return navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        
+                        mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                audioChunks.push(event.data);
+                            }
+                        };
+                        
+                        mediaRecorder.onstop = () => {
+                            // Save the recording when stopped
+                            saveRecording();
+                        };
+                        
+                        return true;
+                    })
+                    .catch(error => {
+                        console.error('Error accessing microphone:', error);
+                        showToast('Microphone Error', 'Could not access microphone', 'error');
+                        return false;
+                    });
+            }
+            
+            // Save audio recording
+            function saveRecording() {
+                if (audioChunks.length === 0) return;
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                
+                // Save to localStorage (as base64 string)
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64data = reader.result;
+                    try {
+                        // We'll save just the recording ID/reference to localStorage
+                        // and keep the actual recording in a temporary cookie
+                        const recordingId = 'recording_' + Date.now();
+                        localStorage.setItem('last_recording_id', recordingId);
+                        
+                        // For demo/simple usage - actual implementation might use a
+                        // better storage mechanism for larger files
+                        document.cookie = `${recordingId}=${base64data.substr(base64data.indexOf(',') + 1)}; max-age=86400; path=/`;
+                        
+                        showToast('Recording Saved', 'Audio recording saved successfully', 'success');
+                    } catch (e) {
+                        console.error('Error saving recording:', e);
+                        showToast('Storage Error', 'Could not save recording (storage limit exceeded)', 'error');
+                        
+                        // Provide direct download instead
+                        downloadAudio(audioBlob);
+                    }
+                };
+            }
+            
+            // Download audio as file
+            function downloadAudio(blob = null) {
+                if (!blob && audioChunks.length === 0) {
+                    showToast('No Recording', 'No audio recording available to download', 'error');
+                    return;
+                }
+                
+                const audioBlob = blob || new Blob(audioChunks, { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `recording-${new Date().toISOString().slice(0, 10)}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Start recording function
+            function startRecording() {
+                if (!recognition) {
+                    const recognitionSupported = setupSpeechRecognition();
+                    if (!recognitionSupported) return;
+                }
+                
+                setupMediaRecorder().then(microphoneReady => {
+                    if (!microphoneReady) return;
+                    
+                    try {
+                        // Start speech recognition
+                        recognition.start();
+                        
+                        // Start media recorder (with 1 second slices)
+                        audioChunks = [];
+                        mediaRecorder.start(1000);
+                        
+                        isRecording = true;
+                        isPaused = false;
+                        statusIndicator.classList.add('status-recording');
+                        statusText.textContent = 'Recording...';
+                        
+                        // Update button states
+                        recordBtn.disabled = true;
+                        stopBtn.disabled = false;
+                        pauseBtn.disabled = false;
+                        
+                        showToast('Recording Started', 'Transcription and audio recording have begun', 'success');
+                    } catch (error) {
+                        console.error('Error starting recording:', error);
+                        showToast('Error', 'Failed to start recording', 'error');
+                    }
+                });
+            }
+            
+            // Stop recording function
+            function stopRecording() {
+                if (!isRecording) return;
+                
+                try {
+                    // Stop speech recognition
+                    recognition.stop();
+                    
+                    // Stop media recorder
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                    
+                    isRecording = false;
+                    isPaused = false;
+                    statusIndicator.classList.remove('status-recording');
+                    statusText.textContent = 'Recording stopped';
+                    
+                    // Update button states
+                    recordBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    pauseBtn.disabled = true;
+                    
+                    showToast('Recording Stopped', 'Transcription and recording saved', 'success');
+                } catch (error) {
+                    console.error('Error stopping recording:', error);
+                    showToast('Error', 'Failed to stop recording properly', 'error');
+                }
+            }
+            
+            // Pause recording function
+            function pauseRecording() {
+                if (!isRecording || !mediaRecorder) return;
+                
+                if (!isPaused) {
+                    // Pause
+                    recognition.stop();
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.pause();
+                    }
+                    
+                    isPaused = true;
+                    statusText.textContent = 'Recording paused';
+                    pauseBtn.innerHTML = '<i class="fas fa-play btn-icon"></i> Resume';
+                    
+                    showToast('Paused', 'Recording paused', 'success');
+                } else {
+                    // Resume
+                    try {
+                        recognition.start();
+                        if (mediaRecorder.state === 'paused') {
+                            mediaRecorder.resume();
+                        }
+                        
+                        isPaused = false;
+                        statusText.textContent = 'Recording...';
+                        pauseBtn.innerHTML = '<i class="fas fa-pause btn-icon"></i> Pause';
+                        
+                        showToast('Resumed', 'Recording resumed', 'success');
+                    } catch (error) {
+                        console.error('Error resuming recording:', error);
+                        showToast('Error', 'Failed to resume recording', 'error');
+                    }
+                }
+            }
+            
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                if (transcriptSegments.length === 0) {
+                    showToast('Nothing to Copy', 'No transcript available to copy', 'error');
+                    return;
+                }
+                
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        showToast('Copied', 'Transcript copied to clipboard', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        showToast('Error', 'Failed to copy to clipboard', 'error');
+                    });
+            }
+            
+            // Download transcript as text file
+            function downloadTranscript() {
+                if (transcriptSegments.length === 0) {
+                    showToast('Nothing to Download', 'No transcript available to download', 'error');
+                    return;
+                }
+                
+                let fullText = '';
+                transcriptSegments.forEach(segment => {
+                    fullText += `[${segment.timestamp}] ${segment.speaker}: ${segment.text}\n\n`;
+                });
+                
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+            }
+            
+            // Clear transcript
+            function clearTranscript() {
+                if (transcriptSegments.length === 0) {
+                    showToast('Nothing to Clear', 'Transcript is already empty', 'error');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to clear the entire transcript? This cannot be undone.')) {
+                    transcriptSegments = [];
+                    updateTranscriptDisplay();
+                    localStorage.removeItem('transcript_segments');
+                    showToast('Cleared', 'Transcript has been cleared', 'success');
+                }
+            }
+            
+            // Add a new speaker
+            function addSpeaker() {
+                const name = speakerNameInput.value.trim();
+                const voice = voiceProfileSelect.value;
+                
+                if (!name) {
+                    showToast('Input Error', 'Please enter a speaker name', 'error');
+                    return;
+                }
+                
+                // Assign color based on number of speakers (cycling through 3 colors)
+                const colorIndex = (speakerProfiles.length % 3) + 1;
+                const colorClass = `speaker-${colorIndex}`;
+                
+                speakerProfiles.push({ name, voice, color: colorClass });
+                
+                // Update the UI
+                updateSpeakersList();
+                
+                // Save to localStorage
+                localStorage.setItem('speaker_profiles', JSON.stringify(speakerProfiles));
+                
+                // Close modal and reset inputs
+                closeSpeakerModal();
+                speakerNameInput.value = '';
+                
+                showToast('Speaker Added', `${name} has been added as a new speaker`, 'success');
+            }
+            
+            // Update speakers list in UI
+            function updateSpeakersList() {
+                speakerList.innerHTML = '';
+                
+                speakerProfiles.forEach((speaker, index) => {
+                    const speakerItem = document.createElement('div');
+                    speakerItem.className = 'speaker-item';
+                    
+                    const speakerAvatar = document.createElement('div');
+                    speakerAvatar.className = `speaker-avatar ${speaker.color}`;
+                    speakerAvatar.textContent = speaker.name.substring(0, 2).toUpperCase();
+                    
+                    const speakerInfo = document.createElement('div');
+                    speakerInfo.className = 'speaker-info';
+                    
+                    const speakerName = document.createElement('div');
+                    speakerName.className = 'speaker-name';
+                    speakerName.textContent = speaker.name;
+                    
+                    const speakerVoice = document.createElement('div');
+                    speakerVoice.className = 'speaker-voice';
+                    speakerVoice.textContent = speaker.voice.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    
+                    speakerInfo.appendChild(speakerName);
+                    speakerInfo.appendChild(speakerVoice);
+                    
+                    speakerItem.appendChild(speakerAvatar);
+                    speakerItem.appendChild(speakerInfo);
+                    
+                    // Add click handler to switch speakers
+                    speakerItem.addEventListener('click', () => {
+                        currentSpeakerIndex = index;
+                        
+                        // Highlight current speaker
+                        document.querySelectorAll('.speaker-item').forEach(item => {
+                            item.style.borderLeft = '';
+                        });
+                        speakerItem.style.borderLeft = '4px solid var(--accent-color)';
+                        
+                        showToast('Speaker Changed', `Active speaker changed to ${speaker.name}`, 'success');
+                    });
+                    
+                    // Highlight current speaker
+                    if (index === currentSpeakerIndex) {
+                        speakerItem.style.borderLeft = '4px solid var(--accent-color)';
+                    }
+                    
+                    speakerList.appendChild(speakerItem);
+                });
+            }
+            
+            // Show speaker modal
+            function openSpeakerModal() {
+                speakerModal.classList.add('show');
+            }
+            
+            // Close speaker modal
+            function closeSpeakerModal() {
+                speakerModal.classList.remove('show');
+                speakerNameInput.value = '';
+            }
+            
+            // Show toast notification
+            function showToast(title, message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                
+                let icon = 'info-circle';
+                if (type === 'success') icon = 'check-circle';
+                if (type === 'error') icon = 'exclamation-circle';
+                
+                toast.innerHTML = `
+                    <div class="toast-icon">
+                        <i class="fas fa-${icon}"></i>
+                    </div>
+                    <div class="toast-content">
+                        <div class="toast-title">${title}</div>
+                        <div class="toast-mess
