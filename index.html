@@ -280,4 +280,290 @@
                 Copy Text
             </button>
             <button id="downloadBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const transcript = document.getElementById('transcript');
+            const statusText = document.querySelector('.status-text');
+            const status = document.querySelector('.status');
+            const copyBtn = document.getElementById('copyBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const addProfileBtn = document.getElementById('addProfile');
+            const profileList = document.querySelector('.profile-list');
+            
+            // Speech Recognition Setup
+            // Properly handle different browser implementations
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+            
+            // Check if speech recognition is supported
+            if (!window.SpeechRecognition) {
+                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
+                recordBtn.disabled = true;
+                statusText.textContent = "Speech recognition not supported";
+                return;
+            }
+            
+            const recognition = new window.SpeechRecognition();
+            
+            // Configure speech recognition
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 3;
+            
+            // State variables
+            let isRecording = false;
+            let currentSpeakerIndex = 0;
+            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
+            let transcriptSegments = [];
+            
+            // Initialize speaker voices dropdown
+            function populateVoiceList() {
+                const voiceSelects = document.querySelectorAll('.profile-voice');
+                
+                // Add some sample voice profiles
+                const voiceProfiles = [
+                    'Default Voice Profile', 
+                    'Deep Male Voice', 
+                    'High Female Voice',
+                    'Neutral Voice',
+                    'British Accent',
+                    'American Accent'
+                ];
+                
+                voiceSelects.forEach(select => {
+                    // Clear existing options first
+                    while(select.firstChild) {
+                        select.removeChild(select.firstChild);
+                    }
+                    
+                    // Add voice profiles
+                    voiceProfiles.forEach((profile, index) => {
+                        const option = document.createElement('option');
+                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
+                        option.textContent = profile;
+                        select.appendChild(option);
+                    });
+                });
+            }
+            
+            // Add a new speaker profile
+            function addSpeakerProfile() {
+                const newIndex = speakerProfiles.length + 1;
+                const profileRow = document.createElement('div');
+                profileRow.className = 'profile-row';
+                profileRow.innerHTML = `
+                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
+                    <select class="profile-voice">
+                        <option value="default">Default Voice Profile</option>
+                    </select>
+                `;
+                
+                profileList.appendChild(profileRow);
+                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
+                
+                // Update the voice options
+                populateVoiceList();
+                
+                // Update event listeners for the new inputs
+                updateProfileEventListeners();
+            }
+            
+            // Update speaker profiles when inputs change
+            function updateProfileEventListeners() {
+                const nameInputs = document.querySelectorAll('.profile-name');
+                const voiceSelects = document.querySelectorAll('.profile-voice');
+                
+                nameInputs.forEach((input, index) => {
+                    input.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].name = input.value;
+                        }
+                    });
+                });
+                
+                voiceSelects.forEach((select, index) => {
+                    select.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].voice = select.value;
+                        }
+                    });
+                });
+            }
+            
+            // Start recording function
+            function startRecording() {
+                try {
+                    recognition.start();
+                    isRecording = true;
+                    status.classList.add('status-recording');
+                    statusText.textContent = 'Recording...';
+                    recordBtn.disabled = true;
+                    stopBtn.disabled = false;
+                } catch (error) {
+                    console.error('Error starting recognition:', error);
+                    statusText.textContent = 'Error starting recognition';
+                }
+            }
+            
+            // Stop recording function
+            function stopRecording() {
+                recognition.stop();
+                isRecording = false;
+                status.classList.remove('status-recording');
+                statusText.textContent = 'Recording stopped';
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+            
+            // Handle recognition results
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                // Add final transcript to segments with current speaker
+                if (finalTranscript) {
+                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    transcriptSegments.push({
+                        speaker: speakerName,
+                        speakerClass: speakerClass,
+                        text: finalTranscript.trim()
+                    });
+                    
+                    // Cycle to next speaker for the next segment
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                }
+                
+                // Update display
+                updateTranscriptDisplay(interimTranscript);
+            };
+            
+            // Update the transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                // Add all transcript segments
+                transcriptSegments.forEach(segment => {
+                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                });
+                
+                // Add interim text if available
+                if (interimText) {
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
+                }
+                
+                transcript.innerHTML = html;
+                
+                // Scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+            
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        statusText.textContent = 'Transcript copied to clipboard';
+                        setTimeout(() => {
+                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+            }
+            
+            // Download transcript as text file
+            function downloadTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadBtn.addEventListener('click', downloadTranscript);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            
+            // Manually cycle through speakers (for demo/testing)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
