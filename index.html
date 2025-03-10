@@ -802,3 +802,619 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const transcript = document.getElementById('transcript');
+            const statusText = document.querySelector('.status-text');
+            const statusIndicator = document.querySelector('.status-indicator');
+            const speakerSelect = document.getElementById('speakerSelect');
+            const newSpeakerName = document.getElementById('newSpeakerName');
+            const addSpeakerBtn = document.getElementById('addSpeakerBtn');
+            const recordingsList = document.getElementById('recordingsList');
+            const recordingsCount = document.getElementById('recordingsCount');
+            const saveModal = document.getElementById('saveModal');
+            const recordingTitle = document.getElementById('recordingTitle');
+            const saveRecordingBtn = document.getElementById('saveRecording');
+            const cancelSaveBtn = document.getElementById('cancelSave');
+            const closeModalBtn = document.getElementById('closeModal');
+            const toastContainer = document.getElementById('toastContainer');
+            const themeSwitcher = document.querySelector('.theme-switcher');
+            
+            // Theme switching
+            const themeOptions = document.querySelectorAll('.theme-option');
+            
+            themeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    const theme = option.getAttribute('data-theme');
+                    document.documentElement.setAttribute('data-theme', theme);
+                    
+                    // Update active state
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    
+                    // Save preference to localStorage
+                    localStorage.setItem('preferredTheme', theme);
+                });
+            });
+            
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem('preferredTheme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                themeOptions.forEach(option => {
+                    if (option.getAttribute('data-theme') === savedTheme) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Speech Recognition Setup
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+            
+            // Check if speech recognition is supported
+            if (!window.SpeechRecognition) {
+                showToast('Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.', 'error');
+                recordBtn.disabled = true;
+                statusText.textContent = "Speech recognition not supported";
+                return;
+            }
+            
+            const recognition = new window.SpeechRecognition();
+            
+            // Media Recorder for audio recording
+            let mediaRecorder;
+            let audioChunks = [];
+            
+            // Configure speech recognition
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 3;
+            
+            // State variables
+            let isRecording = false;
+            let currentSpeakerIndex = 0;
+            let speakers = [{name: 'Speaker 1', id: 'speaker-1'}];
+            let transcriptSegments = [];
+            let recordings = [];
+            let currentAudioBlob = null;
+            let currentStreamRef = null;
+            
+            // Load saved speakers and recordings from local storage
+            function loadSavedData() {
+                const savedSpeakers = localStorage.getItem('voicenoteSpeakers');
+                if (savedSpeakers) {
+                    speakers = JSON.parse(savedSpeakers);
+                    updateSpeakersList();
+                }
+                
+                const savedRecordings = localStorage.getItem('voicenoteRecordings');
+                if (savedRecordings) {
+                    recordings = JSON.parse(savedRecordings);
+                    updateRecordingsList();
+                }
+            }
+            
+            // Save data to local storage
+            function saveDataToStorage() {
+                localStorage.setItem('voicenoteSpeakers', JSON.stringify(speakers));
+                localStorage.setItem('voicenoteRecordings', JSON.stringify(recordings));
+            }
+            
+            // Add a new speaker
+            function addSpeaker() {
+                const name = newSpeakerName.value.trim();
+                if (!name) {
+                    showToast('Please enter a speaker name', 'error');
+                    return;
+                }
+                
+                const speakerId = `speaker-${speakers.length + 1}`;
+                speakers.push({
+                    name: name,
+                    id: speakerId
+                });
+                
+                updateSpeakersList();
+                saveDataToStorage();
+                
+                newSpeakerName.value = '';
+                showToast(`Speaker "${name}" added`, 'success');
+            }
+            
+            // Update the speakers dropdown
+            function updateSpeakersList() {
+                // Clear existing options
+                speakerSelect.innerHTML = '';
+                
+                // Add all speakers
+                speakers.forEach(speaker => {
+                    const option = document.createElement('option');
+                    option.value = speaker.id;
+                    option.textContent = speaker.name;
+                    speakerSelect.appendChild(option);
+                });
+            }
+            
+            // Start recording function
+            function startRecording() {
+                // Request access to microphone
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        currentStreamRef = stream;
+                        
+                        // Start speech recognition
+                        try {
+                            recognition.start();
+                            
+                            // Also start recording audio
+                            mediaRecorder = new MediaRecorder(stream);
+                            audioChunks = [];
+                            
+                            mediaRecorder.ondataavailable = (event) => {
+                                audioChunks.push(event.data);
+                            };
+                            
+                            mediaRecorder.onstop = () => {
+                                // Create blob from recorded chunks
+                                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                                currentAudioBlob = audioBlob;
+                                
+                                // Open save modal
+                                openSaveModal();
+                            };
+                            
+                            mediaRecorder.start();
+                            
+                            // Update UI
+                            isRecording = true;
+                            document.body.classList.add('recording');
+                            statusText.textContent = 'Recording...';
+                            recordBtn.disabled = true;
+                            stopBtn.disabled = false;
+                            
+                        } catch (recognitionError) {
+                            console.error('Error starting recognition:', recognitionError);
+                            statusText.textContent = 'Error starting recognition';
+                            showToast('Failed to start speech recognition', 'error');
+                            
+                            // Stop the media stream since recognition failed
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error accessing microphone:', err);
+                        showToast('Microphone access denied', 'error');
+                        statusText.textContent = 'Microphone access denied';
+                    });
+            }
+            
+            // Stop recording function
+            function stopRecording() {
+                if (recognition) {
+                    recognition.stop();
+                }
+                
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                
+                if (currentStreamRef) {
+                    currentStreamRef.getTracks().forEach(track => track.stop());
+                }
+                
+                isRecording = false;
+                document.body.classList.remove('recording');
+                statusText.textContent = 'Recording stopped';
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+            
+            // Handle recognition results
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscript += result[0].transcript;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                // Add final transcript to segments with current speaker
+                if (finalTranscript) {
+                    const currentSpeaker = speakers[currentSpeakerIndex];
+                    const speakerName = currentSpeaker.name;
+                    const speakerId = currentSpeaker.id;
+                    
+                    transcriptSegments.push({
+                        speaker: speakerName,
+                        speakerId: speakerId,
+                        text: finalTranscript.trim(),
+                        timestamp: new Date().toISOString()
+                    });
+                }
+                
+                // Update display
+                updateTranscriptDisplay(interimTranscript);
+            };
+            
+            // Update the transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                // Add all transcript segments
+                transcriptSegments.forEach(segment => {
+                    // Extract speaker class (speaker-1, speaker-2, etc.)
+                    const speakerClass = segment.speakerId;
+                    html += `<p><span class="speaker ${speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                });
+                
+                // Add interim text if available
+                if (interimText) {
+                    const currentSpeaker = speakers[currentSpeakerIndex];
+                    html += `<p><span class="speaker ${currentSpeaker.id}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
+                }
+                
+                transcript.innerHTML = html;
+                
+                // Scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+            
+            // Open save modal
+            function openSaveModal() {
+                saveModal.classList.add('open');
+                recordingTitle.focus();
+                
+                // Generate default title with date
+                const now = new Date();
+                const formattedDate = now.toLocaleDateString();
+                const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                recordingTitle.value = `Recording ${formattedDate} ${formattedTime}`;
+            }
+            
+            // Close save modal
+            function closeSaveModal() {
+                saveModal.classList.remove('open');
+            }
+            
+            // Save recording
+            function saveRecording() {
+                const title = recordingTitle.value.trim() || `Recording ${new Date().toLocaleString()}`;
+                
+                if (!currentAudioBlob) {
+                    showToast('No recording to save', 'error');
+                    closeSaveModal();
+                    return;
+                }
+                
+                // Create object URL for the audio blob
+                const audioURL = URL.createObjectURL(currentAudioBlob);
+                
+                // Create new recording object
+                const newRecording = {
+                    id: Date.now().toString(),
+                    title: title,
+                    date: new Date().toISOString(),
+                    audioURL: audioURL,
+                    transcript: transcriptSegments,
+                    duration: calculateDuration(transcriptSegments)
+                };
+                
+                // Add to recordings array
+                recordings.push(newRecording);
+                
+                // Update UI
+                updateRecordingsList();
+                
+                // Save to local storage (we need to store a serializable version)
+                const serializableRecordings = recordings.map(rec => {
+                    // We need to store the blob itself as it can't be serialized directly
+                    // In a real app, you might use IndexedDB for blob storage
+                    return {
+                        ...rec,
+                        audioBlob: currentAudioBlob // This won't be serialized, but we need it temporarily
+                    };
+                });
+                
+                localStorage.setItem('voicenoteRecordings', JSON.stringify(serializableRecordings));
+                
+                // Show notification
+                showToast(`Recording "${title}" saved`, 'success');
+                
+                // Clear current transcript and reset for new recording
+                transcriptSegments = [];
+                updateTranscriptDisplay();
+                
+                closeSaveModal();
+            }
+            
+            // Calculate recording duration from transcript segments
+            function calculateDuration(segments) {
+                if (segments.length === 0) return '0:00';
+                
+                // For a more accurate duration, we would use the actual audio duration
+                // This is a simplified estimate based on words
+                let totalWords = 0;
+                segments.forEach(segment => {
+                    totalWords += segment.text.split(/\s+/).length;
+                });
+                
+                // Estimate: average speaking rate is about 150 words per minute
+                const minutes = Math.floor(totalWords / 150);
+                const seconds = Math.floor((totalWords % 150) / 2.5);
+                
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Update recordings list
+            function updateRecordingsList() {
+                recordingsList.innerHTML = '';
+                
+                if (recordings.length === 0) {
+                    recordingsCount.textContent = 'No recordings';
+                    return;
+                }
+                
+                recordingsCount.textContent = `${recordings.length} recording${recordings.length !== 1 ? 's' : ''}`;
+                
+                // Sort recordings by date (newest first)
+                recordings.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                recordings.forEach(recording => {
+                    const li = document.createElement('li');
+                    li.className = 'recording-card';
+                    
+                    // Format date
+                    const recordingDate = new Date(recording.date);
+                    const formattedDate = recordingDate.toLocaleDateString();
+                    const formattedTime = recordingDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    li.innerHTML = `
+                        <div class="recording-info">
+                            <h3 class="recording-title">${recording.title}</h3>
+                            <div class="recording-meta">
+                                <span>${formattedDate} ${formattedTime}</span>
+                                <span>${recording.duration}</span>
+                            </div>
+                        </div>
+                        <div class="recording-controls">
+                            <button class="recording-btn play-btn" data-id="${recording.id}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                Play
+                            </button>
+                            <button class="recording-btn download-btn" data-id="${recording.id}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Download
+                            </button>
+                            <button class="recording-btn delete-btn" data-id="${recording.id}">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                Delete
+                            </button>
+                        </div>
+                    `;
+                    
+                    recordingsList.appendChild(li);
+                });
+                
+                // Add event listeners
+                document.querySelectorAll('.play-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const recordingId = btn.getAttribute('data-id');
+                        playRecording(recordingId);
+                    });
+                });
+                
+                document.querySelectorAll('.download-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const recordingId = btn.getAttribute('data-id');
+                        downloadRecording(recordingId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const recordingId = btn.getAttribute('data-id');
+                        deleteRecording(recordingId);
+                    });
+                });
+            }
+            
+            // Play recording
+            function playRecording(id) {
+                const recording = recordings.find(r => r.id === id);
+                if (!recording) return;
+                
+                // Create audio element
+                const audio = new Audio(recording.audioURL);
+                audio.play();
+            }
+            
+            // Download recording
+            function downloadRecording(id) {
+                const recording = recordings.find(r => r.id === id);
+                if (!recording) return;
+                
+                const a = document.createElement('a');
+                a.href = recording.audioURL;
+                a.download = `${recording.title.replace(/\s+/g, '_')}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+            
+            // Delete recording
+            function deleteRecording(id) {
+                const recordingIndex = recordings.findIndex(r => r.id === id);
+                if (recordingIndex === -1) return;
+                
+                // Revoke object URL to free memory
+                URL.revokeObjectURL(recordings[recordingIndex].audioURL);
+                
+                // Remove from array
+                recordings.splice(recordingIndex, 1);
+                
+                // Update UI and storage
+                updateRecordingsList();
+                saveDataToStorage();
+                
+                showToast('Recording deleted', 'success');
+            }
+            
+            // Show toast notification
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                let iconSvg = '';
+                if (type === 'success') {
+                    iconSvg = `<svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>`;
+                } else {
+                    iconSvg = `<svg class="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>`;
+                }
+                
+                toast.innerHTML = `
+                    ${iconSvg}
+                    <div class="toast-message">${message}</div>
+                    <button class="toast-close">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                `;
+                
+                toastContainer.appendChild(toast);
+                
+                // Close on click
+                toast.querySelector('.toast-close').addEventListener('click', () => {
+                    toast.style.animation = 'slideOut 0.3s forwards';
+                    setTimeout(() => {
+                        toastContainer.removeChild(toast);
+                    }, 300);
+                });
+                
+                // Auto-close after 5 seconds
+                setTimeout(() => {
+                    if (toastContainer.contains(toast)) {
+                        toast.style.animation = 'slideOut 0.3s forwards';
+                        setTimeout(() => {
+                            if (toastContainer.contains(toast)) {
+                                toastContainer.removeChild(toast);
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            }
+            
+            // Handle keyboard events for switching speakers
+            document.addEventListener('keydown', (e) => {
+                // Tab key to switch speakers
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakers.length;
+                    speakerSelect.selectedIndex = currentSpeakerIndex;
+                    statusText.textContent = `Switched to ${speakers[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+            
+            // Recognition error handler
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                
+                if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected";
+                } else if (event.error === 'aborted') {
+                    statusText.textContent = "Recognition aborted";
+                } else if (event.error === 'audio-capture') {
+                    statusText.textContent = "No microphone detected";
+                    showToast('No microphone detected', 'error');
+                } else if (event.error === 'not-allowed') {
+                    statusText.textContent = "Microphone access denied";
+                    showToast('Microphone access denied', 'error');
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error";
+                    showToast('Network error occurred', 'error');
+                } else {
+                    statusText.textContent = `Error: ${event.error}`;
+                    showToast(`Recognition error: ${event.error}`, 'error');
+                }
+                
+                stopRecording();
+            };
+            
+            // Recognition end handler
+            recognition.onend = () => {
+                if (isRecording) {
+                    // Try to restart if we're still supposed to be recording
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error('Failed to restart recognition after onend:', e);
+                        stopRecording();
+                    }
+                }
+            };
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            addSpeakerBtn.addEventListener('click', addSpeaker);
+            saveRecordingBtn.addEventListener('click', saveRecording);
+            cancelSaveBtn.addEventListener('click', closeSaveModal);
+            closeModalBtn.addEventListener('click', closeSaveModal);
+            
+            // Handle speaker selection change
+            speakerSelect.addEventListener('change', () => {
+                // Find the index of the selected speaker
+                const selectedId = speakerSelect.value;
+                const selectedIndex = speakers.findIndex(s => s.id === selectedId);
+                if (selectedIndex !== -1) {
+                    currentSpeakerIndex = selectedIndex;
+                }
+            });
+            
+            // Enter key on new speaker input
+            newSpeakerName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addSpeaker();
+                }
+            });
+            
+            // Enter key on recording title
+            recordingTitle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveRecording();
+                }
+            });
+            
+            // Initial setup
+            loadSavedData();
