@@ -1,20 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Transcription</title>
+    <title>VoiceScribe - Modern Voice Transcription</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* CSS Variables for Theming */
         :root {
-            --primary-color: #4a6fa5;
-            --secondary-color: #166088;
-            --light-color: #f0f5f9;
-            --dark-color: #1e2022;
-            --accent-color: #47b8e0;
-            --error-color: #e74c3c;
+            /* Light Theme (Default) */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --accent-color: #4361ee;
+            --accent-hover: #3a56d4;
+            --border-color: #dee2e6;
             --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --recording-color: #e74c3c;
         }
         
+        /* Dark Theme */
+        [data-theme="dark"] {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-tertiary: #2d2d2d;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --accent-color: #4cc2ff;
+            --accent-hover: #3a95c7;
+            --border-color: #495057;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Blue Light Filter Theme */
+        [data-theme="blue-light"] {
+            --bg-primary: #f8f3e9;
+            --bg-secondary: #f3eadb;
+            --bg-tertiary: #e9dcc7;
+            --text-primary: #473b2d;
+            --text-secondary: #7a6c5d;
+            --accent-color: #c77d3a;
+            --accent-hover: #b06f34;
+            --border-color: #d1c5ae;
+            --card-shadow: 0 4px 6px rgba(138, 110, 78, 0.1);
+        }
+        
+        /* Discreet Theme */
+        [data-theme="discreet"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --accent-color: #6c757d;
+            --accent-hover: #5a6268;
+            --border-color: #dee2e6;
+            --recording-color: #6c757d;
+            --card-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Covert Theme */
+        [data-theme="covert"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --accent-color: #212529;
+            --accent-hover: #343a40;
+            --border-color: #f8f9fa;
+            --recording-color: #212529;
+            --card-shadow: none;
+        }
+        
+        /* Reset and Global Styles */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -22,575 +86,863 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: var(--dark-color);
-            background-color: var(--light-color);
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        h1 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .container {
-            max-width: 800px;
+            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 0 20px;
+            flex: 1;
         }
         
-        .controls {
+        /* Header Styles */
+        header {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 10px;
         }
         
-        .btn {
-            padding: 12px 24px;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--accent-color);
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        /* Theme Switcher */
+        .theme-switcher {
+            position: relative;
+        }
+        
+        .theme-btn {
+            background: var(--bg-tertiary);
             border: none;
             border-radius: 50px;
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+        
+        .theme-btn:hover {
+            background: var(--border-color);
+        }
+        
+        .theme-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            min-width: 200px;
+            z-index: 100;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+        
+        .theme-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        
+        .theme-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            transition: background-color 0.2s;
+        }
+        
+        .theme-option:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        .theme-option.active {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        .theme-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+        
+        .color-light {
+            background: linear-gradient(to bottom right, #ffffff 50%, #e9ecef 50%);
+            border: 1px solid #dee2e6;
+        }
+        
+        .color-dark {
+            background: linear-gradient(to bottom right, #121212 50%, #2d2d2d 50%);
+            border: 1px solid #495057;
+        }
+        
+        .color-blue-light {
+            background: linear-gradient(to bottom right, #f8f3e9 50%, #e9dcc7 50%);
+            border: 1px solid #d1c5ae;
+        }
+        
+        .color-discreet {
+            background: linear-gradient(to bottom right, #ffffff 50%, #e9ecef 50%);
+            border: 1px solid #6c757d;
+        }
+        
+        .color-covert {
+            background: #ffffff;
+            border: 1px solid #212529;
+        }
+        
+        /* Main App Styles */
+        .main-app {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 992px) {
+            .main-app {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        /* Controls Styles */
+        .recording-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .controls-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+        
+        .status-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            background-color: var(--bg-tertiary);
+            margin-bottom: 1rem;
         }
         
-        .btn-primary {
-            background-color: var(--primary-color);
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+        }
+        
+        .status-recording .status-dot {
+            background-color: var(--recording-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            border: none;
             color: white;
         }
         
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .btn-primary:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+        .btn-primary {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--accent-hover);
         }
         
         .btn-danger {
             background-color: var(--error-color);
-            color: white;
         }
         
-        .btn-danger:hover {
+        .btn-danger:hover:not(:disabled) {
             background-color: #c0392b;
         }
         
-        .icon {
-            width: 18px;
-            height: 18px;
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
         
+        .btn-outline:hover:not(:disabled) {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Speakers Styles */
         .speaker-profiles {
             margin-bottom: 1.5rem;
         }
         
-        .transcript-container {
-            margin-top: 2rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            padding: 1rem;
-            min-height: 300px;
-            max-height: 60vh;
-            overflow-y: auto;
-            background-color: #fafafa;
+        .speaker-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
         
-        .transcript-text {
-            white-space: pre-wrap;
-            line-height: 1.7;
+        .speaker-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
         }
         
-        .speaker {
-            font-weight: bold;
-            margin-right: 6px;
-        }
-        
-        .speaker-1 {
-            color: var(--primary-color);
-        }
-        
-        .speaker-2 {
-            color: var(--secondary-color);
-        }
-        
-        .speaker-3 {
-            color: var(--accent-color);
-        }
-        
-        .status {
+        .speaker-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
         }
         
-        .status-indicator {
+        .speaker-info {
+            flex: 1;
+        }
+        
+        .speaker-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .speaker-voice {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .add-speaker-btn {
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-size: 0.9rem;
+            background-color: var(--bg-tertiary);
+            border: 1px dashed var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .add-speaker-btn:hover {
+            background-color: var(--bg-secondary);
+        }
+        
+        /* Transcript Styles */
+        .transcript-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .transcript-container {
+            flex: 1;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1.25rem;
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+        
+        .transcript-entry {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .transcript-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .speaker-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .speaker-color {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #ccc;
-            margin-right: 8px;
         }
         
-        .status-recording .status-indicator {
-            background-color: var(--error-color);
-            animation: pulse 1.5s infinite;
+        .speaker-1 .speaker-color {
+            background-color: var(--accent-color);
         }
         
-        .profile-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input, select {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-        
-        .add-profile {
+        .speaker-2 .speaker-color {
             background-color: var(--success-color);
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
         }
         
-        .add-profile:hover {
-            background-color: #27ae60;
+        .speaker-3 .speaker-color {
+            background-color: var(--warning-color);
         }
         
-        .export-options {
-            margin-top: 1.5rem;
+        .transcript-text {
+            line-height: 1.6;
+        }
+        
+        .transcript-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
         
-        .btn-sm {
-            padding: 8px 16px;
+        .timestamp {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+        
+        /* Transcript Options */
+        .transcript-options {
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Dialog for speaker adding */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+            background-color: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-backdrop.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+        }
+        
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 1.25rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .modal-footer {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-width: 350px;
+        }
+        
+        .toast {
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .toast-success {
+            border-left-color: var(--success-color);
+        }
+        
+        .toast-error {
+            border-left-color: var(--error-color);
+        }
+        
+        .toast-icon {
+            color: var(--accent-color);
+            font-size: 1.25rem;
+            margin-top: 0.25rem;
+        }
+        
+        .toast-success .toast-icon {
+            color: var(--success-color);
+        }
+        
+        .toast-error .toast-icon {
+            color: var(--error-color);
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .toast-message {
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
         
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-top: 0.25rem;
+        }
+        
+        /* Animations */
         @keyframes pulse {
             0% {
                 opacity: 1;
             }
             50% {
-                opacity: 0.5;
+                opacity: 0.3;
             }
             100% {
                 opacity: 1;
             }
         }
         
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
             }
             
-            .controls {
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .transcript-options {
                 flex-direction: column;
                 align-items: stretch;
             }
             
-            .export-options {
-                flex-direction: column;
+            .export-actions {
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Voice Transcription</h1>
-            <p>Click Record to start capturing audio and generating real-time transcription</p>
-        </header>
-        
-        <div class="status">
-            <div class="status-indicator"></div>
-            <span class="status-text">Ready to record</span>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microphone-alt"></i>
+                    <span>VoiceScribe</span>
+                </div>
+                <div class="header-actions">
+                    <div class="theme-switcher">
+                        <button id="themeBtn" class="theme-btn">
+                            <i class="fas fa-sun"></i>
+                            <span>Theme</span>
+                        </button>
+                        <div id="themeDropdown" class="theme-dropdown">
+                            <div class="theme-option active" data-theme="light">
+                                <div class="theme-color color-light"></div>
+                                <span>Light Mode</span>
+                            </div>
+                            <div class="theme-option" data-theme="dark">
+                                <div class="theme-color color-dark"></div>
+                                <span>Dark Mode</span>
+                            </div>
+                            <div class="theme-option" data-theme="blue-light">
+                                <div class="theme-color color-blue-light"></div>
+                                <span>Blue Light Filter</span>
+                            </div>
+                            <div class="theme-option" data-theme="discreet">
+                                <div class="theme-color color-discreet"></div>
+                                <span>Discreet Mode</span>
+                            </div>
+                            <div class="theme-option" data-theme="covert">
+                                <div class="theme-color color-covert"></div>
+                                <span>Covert Mode</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="speaker-profiles">
-            <h3>Speaker Profiles</h3>
-            <div class="profile-list">
-                <div class="profile-row">
-                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
-                    <select class="profile-voice">
+    </header>
+    
+    <main class="container">
+        <div class="main-app">
+            <section class="recording-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-microphone"></i>
+                            Recording Controls
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="recording-controls">
+                            <div class="status-indicator" id="statusIndicator">
+                                <div class="status-dot"></div>
+                                <span id="statusText">Ready to record</span>
+                            </div>
+                            
+                            <div class="speaker-profiles">
+                                <h3>Speaker Profiles</h3>
+                                <div class="speaker-list" id="speakerList">
+                                    <div class="speaker-item">
+                                        <div class="speaker-avatar">S1</div>
+                                        <div class="speaker-info">
+                                            <div class="speaker-name">Speaker 1</div>
+                                            <div class="speaker-voice">Default Voice Profile</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button id="addSpeakerBtn" class="add-speaker-btn">
+                                    <i class="fas fa-plus"></i> Add Speaker
+                                </button>
+                            </div>
+                            
+                            <div class="controls-wrapper">
+                                <button id="recordBtn" class="btn btn-primary">
+                                    <i class="fas fa-microphone btn-icon"></i>
+                                    Record
+                                </button>
+                                <button id="stopBtn" class="btn btn-danger" disabled>
+                                    <i class="fas fa-stop btn-icon"></i>
+                                    Stop
+                                </button>
+                                <button id="pauseBtn" class="btn btn-outline" disabled>
+                                    <i class="fas fa-pause btn-icon"></i>
+                                    Pause
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="transcript-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-file-alt"></i>
+                            Live Transcript
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="transcript-wrapper">
+                            <div class="transcript-container" id="transcriptContainer">
+                                <!-- Transcript entries will be added here -->
+                            </div>
+                            
+                            <div class="transcript-options">
+                                <div class="transcript-settings">
+                                    <button id="clearBtn" class="btn btn-outline">
+                                        <i class="fas fa-trash-alt btn-icon"></i>
+                                        Clear
+                                    </button>
+                                </div>
+                                
+                                <div class="export-actions">
+                                    <button id="copyBtn" class="btn btn-outline">
+                                        <i class="fas fa-copy btn-icon"></i>
+                                        Copy
+                                    </button>
+                                    <button id="downloadTranscriptBtn" class="btn btn-outline">
+                                        <i class="fas fa-file-download btn-icon"></i>
+                                        Text
+                                    </button>
+                                    <button id="downloadAudioBtn" class="btn btn-primary">
+                                        <i class="fas fa-headphones btn-icon"></i>
+                                        Audio
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- Add Speaker Modal -->
+    <div id="speakerModal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Speaker</h3>
+                <button id="closeModalBtn" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="speakerName" class="form-label">Speaker Name</label>
+                    <input type="text" id="speakerName" class="form-input" placeholder="Enter speaker name">
+                </div>
+                <div class="form-group">
+                    <label for="voiceProfile" class="form-label">Voice Profile</label>
+                    <select id="voiceProfile" class="form-select">
                         <option value="default">Default Voice Profile</option>
+                        <option value="deep-male">Deep Male Voice</option>
+                        <option value="high-female">High Female Voice</option>
+                        <option value="neutral">Neutral Voice</option>
+                        <option value="british">British Accent</option>
+                        <option value="american">American Accent</option>
                     </select>
                 </div>
             </div>
-            <button class="add-profile" id="addProfile">+ Add Speaker</button>
-        </div>
-        
-        <div class="controls">
-            <button id="recordBtn" class="btn btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="6"></circle>
-                </svg>
-                Record
-            </button>
-            
-            <button id="stopBtn" class="btn btn-danger" disabled>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
-                </svg>
-                Stop
-            </button>
-        </div>
-        
-        <div class="transcript-container">
-            <div id="transcript" class="transcript-text"></div>
-        </div>
-        
-        <div class="export-options">
-            <button id="copyBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copy Text
-            </button>
-            <button id="downloadBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Download
-            </button>
+            <div class="modal-footer">
+                <button id="cancelSpeakerBtn" class="btn btn-outline">Cancel</button>
+                <button id="saveSpeakerBtn" class="btn btn-primary">Add Speaker</button>
+            </div>
         </div>
     </div>
-
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
-            const recordBtn = document.getElementById('recordBtn');
-            const stopBtn = document.getElementById('stopBtn');
-            const transcript = document.getElementById('transcript');
-            const statusText = document.querySelector('.status-text');
-            const status = document.querySelector('.status');
-            const copyBtn = document.getElementById('copyBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const addProfileBtn = document.getElementById('addProfile');
-            const profileList = document.querySelector('.profile-list');
-            
-            // Speech Recognition Setup
-            // Properly handle different browser implementations
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
-            
-            // Check if speech recognition is supported
-            if (!window.SpeechRecognition) {
-                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
-                recordBtn.disabled = true;
-                statusText.textContent = "Speech recognition not supported";
-                return;
-            }
-            
-            const recognition = new window.SpeechRecognition();
-            
-            // Configure speech recognition
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-            recognition.maxAlternatives = 3;
-            
-            // State variables
-            let isRecording = false;
-            let currentSpeakerIndex = 0;
-            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
-            let transcriptSegments = [];
-            
-            // Initialize speaker voices dropdown
-            function populateVoiceList() {
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                // Add some sample voice profiles
-                const voiceProfiles = [
-                    'Default Voice Profile', 
-                    'Deep Male Voice', 
-                    'High Female Voice',
-                    'Neutral Voice',
-                    'British Accent',
-                    'American Accent'
-                ];
-                
-                voiceSelects.forEach(select => {
-                    // Clear existing options first
-                    while(select.firstChild) {
-                        select.removeChild(select.firstChild);
-                    }
-                    
-                    // Add voice profiles
-                    voiceProfiles.forEach((profile, index) => {
-                        const option = document.createElement('option');
-                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = profile;
-                        select.appendChild(option);
-                    });
-                });
-            }
-            
-            // Add a new speaker profile
-            function addSpeakerProfile() {
-                const newIndex = speakerProfiles.length + 1;
-                const profileRow = document.createElement('div');
-                profileRow.className = 'profile-row';
-                profileRow.innerHTML = `
-                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                `;
-                
-                profileList.appendChild(profileRow);
-                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
-                
-                // Update the voice options
-                populateVoiceList();
-                
-                // Update event listeners for the new inputs
-                updateProfileEventListeners();
-            }
-            
-            // Update speaker profiles when inputs change
-            function updateProfileEventListeners() {
-                const nameInputs = document.querySelectorAll('.profile-name');
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                nameInputs.forEach((input, index) => {
-                    input.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].name = input.value;
-                        }
-                    });
-                });
-                
-                voiceSelects.forEach((select, index) => {
-                    select.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].voice = select.value;
-                        }
-                    });
-                });
-            }
-            
-            // Start recording function
-            function startRecording() {
-                try {
-                    // Request microphone permission first
-                    navigator.mediaDevices.getUserMedia({ audio: true })
-                        .then(stream => {
-                            // Once we have microphone permission, start recognition
-                            try {
-                                recognition.start();
-                                isRecording = true;
-                                status.classList.add('status-recording');
-                                statusText.textContent = 'Recording...';
-                                recordBtn.disabled = true;
-                                stopBtn.disabled = false;
-                                
-                                // Close the stream as we don't need it directly
-                                stream.getTracks().forEach(track => track.stop());
-                            } catch (recognitionError) {
-                                console.error('Error starting recognition:', recognitionError);
-                                statusText.textContent = 'Error starting recognition';
-                            }
-                        })
-                        .catch(micError => {
-                            console.error('Microphone permission denied:', micError);
-                            statusText.textContent = 'Microphone permission denied';
-                            alert("You need to allow microphone access to use the voice transcription feature.");
-                        });
-                } catch (error) {
-                    console.error('Error requesting microphone:', error);
-                    statusText.textContent = 'Error requesting microphone';
-                }
-            }
-            
-            // Stop recording function
-            function stopRecording() {
-                recognition.stop();
-                isRecording = false;
-                status.classList.remove('status-recording');
-                statusText.textContent = 'Recording stopped';
-                recordBtn.disabled = false;
-                stopBtn.disabled = true;
-            }
-            
-            // Handle recognition results
-            recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-                
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        finalTranscript += result[0].transcript;
-                    } else {
-                        interimTranscript += result[0].transcript;
-                    }
-                }
-                
-                // Add final transcript to segments with current speaker
-                if (finalTranscript) {
-                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    transcriptSegments.push({
-                        speaker: speakerName,
-                        speakerClass: speakerClass,
-                        text: finalTranscript.trim()
-                    });
-                    
-                    // Cycle to next speaker for the next segment
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                }
-                
-                // Update display
-                updateTranscriptDisplay(interimTranscript);
-            };
-            
-            // Update the transcript display
-            function updateTranscriptDisplay(interimText = '') {
-                let html = '';
-                
-                // Add all transcript segments
-                transcriptSegments.forEach(segment => {
-                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
-                });
-                
-                // Add interim text if available
-                if (interimText) {
-                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${interimText}</span></p>`;
-                }
-                
-                transcript.innerHTML = html;
-                
-                // Scroll to bottom
-                transcript.scrollTop = transcript.scrollHeight;
-            }
-            
-            // Copy transcript to clipboard
-            function copyTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                navigator.clipboard.writeText(fullText)
-                    .then(() => {
-                        statusText.textContent = 'Transcript copied to clipboard';
-                        setTimeout(() => {
-                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text: ', err);
-                    });
-            }
-            
-            // Download transcript as text file
-            function downloadTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                const blob = new Blob([fullText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            // Event Listeners
-            recordBtn.addEventListener('click', startRecording);
-            stopBtn.addEventListener('click', stopRecording);
-            copyBtn.addEventListener('click', copyTranscript);
-            downloadBtn.addEventListener('click', downloadTranscript);
-            addProfileBtn.addEventListener('click', addSpeakerProfile);
-            
-            // Recognition event handlers
-            recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
-                statusText.textContent = `Error: ${event.error}`;
-                stopRecording();
-                
-                // Show a more helpful message for common errors
-                if (event.error === 'not-allowed') {
-                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
-                } else if (event.error === 'no-speech') {
-                    statusText.textContent = "No speech detected. Please try again.";
-                } else if (event.error === 'network') {
-                    statusText.textContent = "Network error occurred. Please check your connection.";
-                }
-            };
-            
-            recognition.onend = () => {
-                if (isRecording) {
-                    recognition.start();
-                }
-            };
-            
-            // Initial setup
-            populateVoiceList();
-            updateProfileEventListeners();
-            
-            // Manually cycle through speakers (for demo/testing)
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab' && isRecording) {
-                    e.preventDefault();
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
-                    
-                    setTimeout(() => {
-                        statusText.textContent = 'Recording...';
-                    }, 1500);
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+            const themeBtn = document.
