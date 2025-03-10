@@ -856,4 +856,260 @@
                                 <audio src="${audioUrl}" controls></audio>
                                 <button class="btn-sm btn-primary download-recording" data-id="${recording.id}">
                                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        
+                        savedRecordings.appendChild(recordingItem);
+                        
+                        // Add event listener for download button
+                        recordingItem.querySelector('.download-recording').addEventListener('click', () => {
+                            const a = document.createElement('a');
+                            a.href = audioUrl;
+                            a.download = `${recording.name}.mp3`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        });
+                    });
+                };
+            }
+            
+            // Handle recognition results
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        // Apply grammar correction
+                        const correctedText = correctGrammar(result[0].transcript);
+                        finalTranscript += correctedText;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                // Add final transcript to segments with current speaker
+                if (finalTranscript) {
+                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    transcriptSegments.push({
+                        speaker: speakerName,
+                        speakerClass: speakerClass,
+                        text: finalTranscript.trim()
+                    });
+                    
+                    // Cycle to next speaker for the next segment
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                }
+                
+                // Update display
+                updateTranscriptDisplay(interimTranscript);
+            };
+            
+            // Update the transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                // Add all transcript segments
+                transcriptSegments.forEach(segment => {
+                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                });
+                
+                // Add interim text if available
+                if (interimText) {
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    // Show grammar correction for interim text if enabled
+                    const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
+                }
+                
+                transcript.innerHTML = html;
+                
+                // Scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+            
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        statusText.textContent = 'Transcript copied to clipboard';
+                        setTimeout(() => {
+                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+            }
+            
+            // Download transcript as text file
+            function downloadTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Download the latest audio recording
+            function downloadAudio() {
+                if (audioChunks.length === 0) {
+                    statusText.textContent = 'No audio recording available';
+                    setTimeout(() => {
+                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                    }, 2000);
+                    return;
+                }
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Theme switching functionality
+            function updateTheme(value) {
+                // Remove any existing theme classes
+                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
+                
+                // Add new theme class based on slider value
+                switch (parseInt(value)) {
+                    case 0: // Standard (no class needed)
+                        break;
+                    case 1: // Blue Light Filter
+                        document.body.classList.add('blue-light-theme');
+                        break;
+                    case 2: // Discrete
+                        document.body.classList.add('discrete-theme');
+                        break;
+                    case 3: // Dark
+                        document.body.classList.add('dark-theme');
+                        break;
+                }
+                
+                // Save theme preference to localStorage
+                localStorage.setItem('theme', value);
+            }
+            
+            // Load saved theme preference
+            function loadThemePreference() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme !== null) {
+                    themeSlider.value = savedTheme;
+                    updateTheme(savedTheme);
+                }
+            }
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadTextBtn.addEventListener('click', downloadTranscript);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            
+            // Theme slider event listener
+            themeSlider.addEventListener('input', (e) => {
+                updateTheme(e.target.value);
+            });
+            
+            // Grammar toggle event listener
+            grammarToggle.addEventListener('change', () => {
+                // Update the display to reflect grammar toggle state
+                updateTranscriptDisplay();
+                
+                // Save preference
+                localStorage.setItem('grammarCorrection', grammarToggle.checked);
+            });
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            loadThemePreference();
+            
+            // Load saved grammar correction preference
+            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
+            if (savedGrammarPreference !== null) {
+                grammarToggle.checked = savedGrammarPreference === 'true';
+            }
+            
+            // Manually cycle through speakers (for demo/testing)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
