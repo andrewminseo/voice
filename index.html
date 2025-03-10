@@ -50,18 +50,81 @@
             filter: sepia(30%) brightness(95%);
         }
         
-        /* Discrete theme */
+        /* Discrete theme - disguised as a note-taking app */
         .discrete-theme {
-            --primary-color: #868686;
-            --secondary-color: #6d6d6d;
+            --primary-color: #4285f4;
+            --secondary-color: #0f9d58;
             --light-color: #f5f5f5;
             --dark-color: #333333;
-            --accent-color: #b0b0b0;
+            --accent-color: #fbbc05;
             --background-color: #f5f5f5;
-            --container-background: #f9f9f9;
+            --container-background: #ffffff;
             --text-color: #333333;
             --border-color: #e0e0e0;
-            --transcript-background: #f0f0f0;
+            --transcript-background: #ffffff;
+        }
+        
+        /* Discrete mode UI changes */
+        .discrete-theme h1 {
+            color: #4285f4;
+        }
+        
+        .discrete-theme header p {
+            display: none;
+        }
+        
+        .discrete-theme header::after {
+            content: 'Quick Notes';
+            display: block;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .discrete-theme .status {
+            display: none;
+        }
+        
+        .discrete-theme .speaker-profiles {
+            display: none;
+        }
+        
+        .discrete-theme .btn-primary {
+            background-color: #4285f4;
+        }
+        
+        .discrete-theme .btn-danger {
+            background-color: #ea4335;
+        }
+        
+        .discrete-theme #recordBtn::before {
+            content: 'Start Notes';
+            margin-left: 4px;
+        }
+        
+        .discrete-theme #recordBtn .icon {
+            display: none;
+        }
+        
+        .discrete-theme #stopBtn::before {
+            content: 'Save Notes';
+            margin-left: 4px;
+        }
+        
+        .discrete-theme #stopBtn .icon {
+            display: none;
+        }
+        
+        .discrete-theme .transcript-container {
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .discrete-theme .speaker {
+            color: #0f9d58 !important;
+        }
+        
+        .discrete-theme .recordings-list h3 {
+            content: 'Saved Notes';
         }
         
         * {
@@ -251,24 +314,36 @@
             font-size: 0.9rem;
         }
         
-        /* Theme switcher styles */
+        /* Theme switcher styles - more compact and discrete */
         .theme-switcher {
-            margin: 1rem 0;
-            padding: 1rem;
+            position: relative;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
             background-color: var(--container-background);
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            max-width: 250px;
+            margin-left: auto;
+            margin-right: 0;
+            transition: opacity 0.3s;
+            opacity: 0.7;
+        }
+        
+        .theme-switcher:hover {
+            opacity: 1;
         }
         
         .theme-switcher h3 {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             color: var(--secondary-color);
+            font-size: 0.85rem;
+            text-align: right;
         }
         
         .slider-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 5px;
         }
         
         .slider-labels {
@@ -279,9 +354,27 @@
         
         .slider-label {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             flex: 1;
             color: var(--text-color);
+        }
+        
+        /* Minimalist button for theme switcher visibility */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 24px;
+            height: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .theme-slider {
@@ -445,20 +538,20 @@
             <p>Click Record to start capturing audio and generating real-time transcription</p>
         </header>
         
-        <div class="theme-switcher">
-            <h3>Interface Mode</h3>
+        <div class="theme-switcher" id="themeSwitcher">
+            <h3>Display Settings</h3>
             <div class="slider-container">
                 <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
                 <div class="slider-labels">
                     <span class="slider-label">Standard</span>
-                    <span class="slider-label">Blue Light Filter</span>
-                    <span class="slider-label">Discrete</span>
+                    <span class="slider-label">Blue</span>
+                    <span class="slider-label">Notes</span>
                     <span class="slider-label">Dark</span>
                 </div>
             </div>
             
             <div class="feature-toggle">
-                <label for="grammarToggle">Grammar Correction:</label>
+                <label for="grammarToggle">Auto-Correct:</label>
                 <label class="toggle">
                     <input type="checkbox" id="grammarToggle" checked>
                     <span class="toggle-slider"></span>
@@ -1017,16 +1110,68 @@
                 // Add new theme class based on slider value
                 switch (parseInt(value)) {
                     case 0: // Standard (no class needed)
+                        document.title = "Voice Transcription";
                         break;
                     case 1: // Blue Light Filter
                         document.body.classList.add('blue-light-theme');
+                        document.title = "Voice Transcription";
                         break;
-                    case 2: // Discrete
+                    case 2: // Discrete (disguised as notes app)
                         document.body.classList.add('discrete-theme');
+                        document.title = "Quick Notes";
+                        
+                        // Change text of elements for better disguise
+                        document.querySelector('.recordings-list h3').textContent = "Saved Notes";
+                        
+                        // Change button text on record/stop buttons
+                        document.getElementById('recordBtn').innerHTML = 'Start Notes';
+                        document.getElementById('stopBtn').innerHTML = 'Save Notes';
+                        
+                        // Update download button text
+                        document.getElementById('downloadTextBtn').textContent = "Export Notes";
+                        document.getElementById('downloadAudioBtn').textContent = "Backup Notes";
                         break;
                     case 3: // Dark
                         document.body.classList.add('dark-theme');
+                        document.title = "Voice Transcription";
                         break;
+                }
+                
+                // Reset to original text if not in discrete mode
+                if (parseInt(value) !== 2) {
+                    document.querySelector('.recordings-list h3').textContent = "Saved Recordings";
+                    
+                    // Restore button icons if not in discrete mode
+                    document.getElementById('recordBtn').innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="6"></circle>
+                        </svg>
+                        Record
+                    `;
+                    document.getElementById('stopBtn').innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                        </svg>
+                        Stop
+                    `;
+                    
+                    // Reset download button text
+                    document.getElementById('downloadTextBtn').innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Text
+                    `;
+                    document.getElementById('downloadAudioBtn').innerHTML = `
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                        Download Audio
+                    `;
                 }
                 
                 // Save theme preference to localStorage
@@ -1086,6 +1231,21 @@
                 }
             };
             
+            // Make theme switcher more discrete
+            const themeSwitcher = document.getElementById('themeSwitcher');
+            
+            // Add CSS to make it collapse to corner
+            themeSwitcher.style.transition = 'all 0.3s ease';
+            
+            // Add hover effect to make it more visible on hover
+            themeSwitcher.addEventListener('mouseenter', () => {
+                themeSwitcher.style.opacity = '1';
+            });
+            
+            themeSwitcher.addEventListener('mouseleave', () => {
+                themeSwitcher.style.opacity = '0.7';
+            });
+            
             // Initial setup
             populateVoiceList();
             updateProfileEventListeners();
@@ -1096,6 +1256,20 @@
             if (savedGrammarPreference !== null) {
                 grammarToggle.checked = savedGrammarPreference === 'true';
             }
+            
+            // Keyboard shortcut for quickly switching to discrete mode (Ctrl+D)
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    // Toggle between standard and discrete mode
+                    if (themeSlider.value === '2') {
+                        themeSlider.value = '0'; // Switch to standard
+                    } else {
+                        themeSlider.value = '2'; // Switch to discrete
+                    }
+                    updateTheme(themeSlider.value);
+                }
+            });
             
             // Manually cycle through speakers (for demo/testing)
             document.addEventListener('keydown', (e) => {
