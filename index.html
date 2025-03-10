@@ -4,15 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Transcription</title>
-    <!-- Security Headers (added via HTML meta tags) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; worker-src 'self' blob:;">
-    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Permissions-Policy" content="accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(self), payment=(), usb=(), interest-cohort=()">
-    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
-    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
-    <meta http-equiv="Cross-Origin-Resource-Policy" content="same-origin">
     <style>
         :root {
             /* Default theme (Light) */
@@ -772,20 +763,10 @@
             <h3>Saved Recordings</h3>
             <div id="savedRecordings"></div>
         </div>
-        
-        <!-- Add nonce for scripts when used with proper CSP implementation on server -->
-        <div id="csp-nonce" data-nonce="%%SERVER_GENERATED_NONCE%%" style="display:none;"></div>
     </div>
 
     <script>
-        // Get CSP nonce if available (when running with proper server implementation)
-        const nonceElement = document.getElementById('csp-nonce');
-        const nonce = nonceElement ? nonceElement.dataset.nonce : '';
-
         document.addEventListener('DOMContentLoaded', () => {
-            // Enable additional security measures
-            enableSecurityFeatures();
-            
             // DOM Elements
             const recordBtn = document.getElementById('recordBtn');
             const stopBtn = document.getElementById('stopBtn');
@@ -801,281 +782,602 @@
             const grammarToggle = document.getElementById('grammarToggle');
             const savedRecordings = document.getElementById('savedRecordings');
             
-            // Security enhancement function
-            function enableSecurityFeatures() {
-                // 1. Sanitize inputs (XSS prevention)
-                document.querySelectorAll('input[type="text"]').forEach(input => {
-                    input.addEventListener('input', sanitizeInput);
-                    // Run the main initialization
-            initializeSecureApplication();
-        });
-        
-        // Service Worker Registration for additional security
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('ServiceWorker registration failed: ', error);
+            // Grammar correction dictionary (Simple example)
+            const grammarCorrections = {
+                "i ": "I ",
+                "i'm": "I'm",
+                "dont": "don't",
+                "cant": "can't",
+                "wont": "won't",
+                "im ": "I'm ",
+                "ive": "I've",
+                "youre": "you're",
+                "theyre": "they're",
+                "thier": "their",
+                " i ": " I ",
+                "gonna": "going to",
+                "wanna": "want to",
+                "kinda": "kind of",
+                "sorta": "sort of",
+                "alot": "a lot",
+            };
+            
+            // Speech Recognition Setup
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
+            
+            // Check if speech recognition is supported
+            if (!window.SpeechRecognition) {
+                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
+                recordBtn.disabled = true;
+                statusText.textContent = "Speech recognition not supported";
+                return;
+            }
+            
+            const recognition = new window.SpeechRecognition();
+            
+            // Configure speech recognition
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            recognition.maxAlternatives = 3;
+            
+            // State variables
+            let isRecording = false;
+            let currentSpeakerIndex = 0;
+            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
+            let transcriptSegments = [];
+            let audioChunks = [];
+            let mediaRecorder = null;
+            
+            // Initialize speaker voices dropdown
+            function populateVoiceList() {
+                const voiceSelects = document.querySelectorAll('.profile-voice');
+                
+                // Add some sample voice profiles
+                const voiceProfiles = [
+                    'Default Voice Profile', 
+                    'Deep Male Voice', 
+                    'High Female Voice',
+                    'Neutral Voice',
+                    'British Accent',
+                    'American Accent'
+                ];
+                
+                voiceSelects.forEach(select => {
+                    // Clear existing options first
+                    while(select.firstChild) {
+                        select.removeChild(select.firstChild);
+                    }
+                    
+                    // Add voice profiles
+                    voiceProfiles.forEach((profile, index) => {
+                        const option = document.createElement('option');
+                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
+                        option.textContent = profile;
+                        select.appendChild(option);
                     });
-            });
-        }
-                
-                // 2. Add secure localStorage handling with encryption
-                secureLocalStorage.init();
-                
-                // 3. Add CSRF protection for downloads
-                addCSRFProtection();
-                
-                // 4. Implement Content-Security-Policy dynamically if not set via headers
-                ensureCSP();
+                });
             }
             
-            // Sanitize user input to prevent XSS
-            function sanitizeInput(e) {
-                const input = e.target;
-                // Remove potentially dangerous characters and HTML
-                input.value = input.value
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#039;')
-                    .replace(/script/gi, 'scrīpt')
-                    .replace(/on\w+=/gi, 'data-on=');
+            // Add a new speaker profile
+            function addSpeakerProfile() {
+                const newIndex = speakerProfiles.length + 1;
+                const profileRow = document.createElement('div');
+                profileRow.className = 'profile-row';
+                profileRow.innerHTML = `
+                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
+                    <select class="profile-voice">
+                        <option value="default">Default Voice Profile</option>
+                    </select>
+                `;
+                
+                profileList.appendChild(profileRow);
+                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
+                
+                // Update the voice options
+                populateVoiceList();
+                
+                // Update event listeners for the new inputs
+                updateProfileEventListeners();
             }
             
-            // Initialization sequence with secure boot steps
-            function initializeSecureApplication() {
-                // Step 1: Run security audit
-                const securityState = securityAudit();
+            // Update speaker profiles when inputs change
+            function updateProfileEventListeners() {
+                const nameInputs = document.querySelectorAll('.profile-name');
+                const voiceSelects = document.querySelectorAll('.profile-voice');
                 
-                // Step 2: Set up Content Security Policy if not set
-                ensureCSP();
-                
-                // Step 3: Initialize secure storage
-                secureLocalStorage.init();
-                
-                // Step 4: Set up CSRF protection
-                addCSRFProtection();
-                
-                // Step 5: Enable input sanitization
-                enableSecurityFeatures();
-                
-                // Step 6: Safe initialization of features
-                if (safeInitialization()) {
-                    // Step 7: Load application data
-                    populateVoiceList();
-                    updateProfileEventListeners();
-                    loadThemePreference();
-                    
-                    // Step 8: Load user preferences securely
-                    loadSecurePreferences();
-                    
-                    // Step 9: Set up keyboard controls with security verification
-                    setupSecureKeyboardControls();
-                    
-                    // Step 10: Regular security checks
-                    setInterval(performSecurityChecks, 30000); // Check every 30 seconds
-                    
-                    console.log('Secure application initialization complete');
-                    return true;
-                } else {
-                    console.error('Secure initialization failed');
-                    return false;
-                }
-            }
-            
-            // Load user preferences securely
-            function loadSecurePreferences() {
-                // Load grammar correction preference from secure storage
-                try {
-                    const savedGrammarPreference = secureLocalStorage.getItem('grammarCorrection');
-                    if (savedGrammarPreference !== null) {
-                        grammarToggle.checked = savedGrammarPreference === true;
-                    }
-                } catch (e) {
-                    console.error('Error loading preferences:', e);
-                    // Fallback to defaults
-                    grammarToggle.checked = true;
-                }
-            }
-            
-            // Set up keyboard controls with security verification
-            function setupSecureKeyboardControls() {
-                document.addEventListener('keydown', (e) => {
-                    // Verify event is legitimate
-                    if (!e.isTrusted) {
-                        console.warn('Untrusted keyboard event detected');
-                        return;
-                    }
-                    
-                    // Tab key to cycle speakers
-                    if (e.key === 'Tab' && isRecording) {
-                        e.preventDefault();
-                        
-                        // Add a rate limiter to prevent spam
-                        if (window.lastTabPress && Date.now() - window.lastTabPress < 500) {
-                            console.warn('Tab key pressed too quickly - throttling');
-                            return;
+                nameInputs.forEach((input, index) => {
+                    input.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].name = input.value;
                         }
-                        window.lastTabPress = Date.now();
-                        
-                        currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                        statusText.textContent = `Switched to ${sanitizeHTML(speakerProfiles[currentSpeakerIndex].name)}`;
-                        
-                        setTimeout(() => {
-                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                        }, 1500);
-                    }
-                    
-                    // Escape key to stop recording (emergency stop)
-                    if (e.key === 'Escape' && isRecording) {
-                        console.log('Emergency stop triggered by Escape key');
-                        stopRecording();
+                    });
+                });
+                
+                voiceSelects.forEach((select, index) => {
+                    select.addEventListener('change', () => {
+                        if (speakerProfiles[index]) {
+                            speakerProfiles[index].voice = select.value;
+                        }
+                    });
+                });
+            }
+            
+            // Apply grammar correction
+            function correctGrammar(text) {
+                if (!grammarToggle.checked) return text;
+                
+                let correctedText = ' ' + text + ' '; // Add spaces for matching whole words
+                
+                // Apply corrections
+                Object.keys(grammarCorrections).forEach(error => {
+                    const regex = new RegExp(error, 'gi');
+                    correctedText = correctedText.replace(regex, grammarCorrections[error]);
+                });
+                
+                // Basic capitalization for sentences
+                correctedText = correctedText.replace(/(?<=^|[.!?]\s+)[a-z]/g, match => match.toUpperCase());
+                
+                // Remove extra spaces we added
+                correctedText = correctedText.trim();
+                
+                return correctedText;
+            }
+            
+            // Start recording function
+            function startRecording() {
+                try {
+                    // Request microphone permission first
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                        .then(stream => {
+                            // Once we have microphone permission, start recognition
+                            try {
+                                recognition.start();
+                                isRecording = true;
+                                status.classList.add('status-recording');
+                                statusText.textContent = 'Recording...';
+                                recordBtn.disabled = true;
+                                stopBtn.disabled = false;
+                                
+                                // Create media recorder for audio recording
+                                mediaRecorder = new MediaRecorder(stream);
+                                mediaRecorder.ondataavailable = (event) => {
+                                    if (event.data.size > 0) {
+                                        audioChunks.push(event.data);
+                                    }
+                                };
+                                
+                                mediaRecorder.start();
+                                
+                                mediaRecorder.onstop = () => {
+                                    // Save audio recording
+                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                                    saveRecording(audioBlob);
+                                    audioChunks = [];
+                                };
+                            } catch (recognitionError) {
+                                console.error('Error starting recognition:', recognitionError);
+                                statusText.textContent = 'Error starting recognition';
+                            }
+                        })
+                        .catch(micError => {
+                            console.error('Microphone permission denied:', micError);
+                            statusText.textContent = 'Microphone permission denied';
+                            alert("You need to allow microphone access to use the voice transcription feature.");
+                        });
+                } catch (error) {
+                    console.error('Error requesting microphone:', error);
+                    statusText.textContent = 'Error requesting microphone';
+                }
+            }
+            
+            // Stop recording function
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+                
+                recognition.stop();
+                isRecording = false;
+                status.classList.remove('status-recording');
+                statusText.textContent = 'Recording stopped';
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+            
+            // Save recording to cookies and display in recordings list
+            function saveRecording(audioBlob) {
+                const recordingId = 'recording_' + Date.now();
+                const recordingName = `Recording ${new Date().toLocaleString()}`;
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Create HTML for recording
+                const recordingItem = document.createElement('div');
+                recordingItem.className = 'recording-item';
+                recordingItem.innerHTML = `
+                    <div class="recording-info">
+                        <p>${recordingName}</p>
+                    </div>
+                    <div class="recording-actions">
+                        <audio src="${audioUrl}" controls></audio>
+                        <button class="btn-sm btn-primary download-recording" data-id="${recordingId}">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <button class="btn-sm btn-danger delete-recording" data-id="${recordingId}">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                savedRecordings.appendChild(recordingItem);
+                
+                // Save to IndexedDB (more reliable than cookies for binary data)
+                saveToIndexedDB(recordingId, audioBlob, recordingName);
+                
+                // Add event listener for download button
+                recordingItem.querySelector('.download-recording').addEventListener('click', () => {
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = `${recordingName}.mp3`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+                
+                // Add event listener for delete button
+                recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to delete this recording?')) {
+                        deleteRecording(recordingId);
+                        recordingItem.remove();
                     }
                 });
             }
             
-            // Perform regular security checks
-            function performSecurityChecks() {
-                // Check if we're still in a secure context
-                if (window.isSecureContext === false) {
-                    console.warn('Application running in insecure context.');
-                }
-                
-                // Check for storage integrity
-                try {
-                    const recordingCount = secureLocalStorage.getItem('recording_count');
-                    if (recordingCount !== null && recordingCount > 100) {
-                        console.warn('High number of recordings stored.');
-                    }
-                } catch (e) {
-                    console.error('Error checking storage:', e);
-                }
-                
-                // Check for suspicious DOM modifications
-                const scriptTags = document.querySelectorAll('script:not([nonce])');
-                if (scriptTags.length > 0) {
-                    console.warn('Detected script tags without nonce. Potential XSS attack.');
-                }
-                
-                // Check for suspicious iframes
-                const iframes = document.querySelectorAll('iframe');
-                if (iframes.length > 0) {
-                    console.warn('Detected iframes. Potential embedding attack.');
-                }
-            }
+            // IndexedDB setup for saving recordings
+            let db;
+            const request = indexedDB.open('RecordingsDB', 1);
             
-            // Secure localStorage with encryption
-            const secureLocalStorage = {
-                encryptionKey: null,
-                
-                init() {
-                    // Generate or retrieve encryption key
-                    if (!sessionStorage.getItem('encryptionKey')) {
-                        const array = new Uint8Array(16);
-                        window.crypto.getRandomValues(array);
-                        this.encryptionKey = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-                        sessionStorage.setItem('encryptionKey', this.encryptionKey);
-                    } else {
-                        this.encryptionKey = sessionStorage.getItem('encryptionKey');
-                    }
-                },
-                
-                // Simple XOR encryption (in production, use a proper crypto library)
-                encrypt(text, key = this.encryptionKey) {
-                    if (!key) return text;
-                    
-                    const textBytes = new TextEncoder().encode(text);
-                    const keyBytes = new TextEncoder().encode(key);
-                    
-                    const result = new Uint8Array(textBytes.length);
-                    for (let i = 0; i < textBytes.length; i++) {
-                        result[i] = textBytes[i] ^ keyBytes[i % keyBytes.length];
-                    }
-                    
-                    return Array.from(result, byte => byte.toString(16).padStart(2, '0')).join('');
-                },
-                
-                decrypt(encryptedText, key = this.encryptionKey) {
-                    if (!key || !encryptedText) return encryptedText;
-                    
-                    try {
-                        const bytes = new Uint8Array(encryptedText.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-                        const keyBytes = new TextEncoder().encode(key);
-                        
-                        const result = new Uint8Array(bytes.length);
-                        for (let i = 0; i < bytes.length; i++) {
-                            result[i] = bytes[i] ^ keyBytes[i % keyBytes.length];
-                        }
-                        
-                        return new TextDecoder().decode(result);
-                    } catch (e) {
-                        console.error('Decryption error:', e);
-                        return '';
-                    }
-                },
-                
-                setItem(key, value) {
-                    const encryptedValue = this.encrypt(JSON.stringify(value));
-                    localStorage.setItem(this.encrypt(key), encryptedValue);
-                },
-                
-                getItem(key) {
-                    const encryptedValue = localStorage.getItem(this.encrypt(key));
-                    if (!encryptedValue) return null;
-                    
-                    try {
-                        return JSON.parse(this.decrypt(encryptedValue));
-                    } catch (e) {
-                        console.error('Error parsing stored value:', e);
-                        return null;
-                    }
-                },
-                
-                removeItem(key) {
-                    localStorage.removeItem(this.encrypt(key));
+            request.onerror = (event) => {
+                console.error('Error opening IndexedDB:', event.target.error);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                db = event.target.result;
+                if (!db.objectStoreNames.contains('recordings')) {
+                    db.createObjectStore('recordings', { keyPath: 'id' });
                 }
             };
             
-            // Add CSRF protection for downloads
-            function addCSRFProtection() {
-                // Generate a CSRF token
-                const csrfToken = generateCSRFToken();
+            request.onsuccess = (event) => {
+                db = event.target.result;
+                loadSavedRecordings();
+            };
+            
+            // Save recording to IndexedDB
+            function saveToIndexedDB(id, blob, name) {
+                if (!db) return;
                 
-                // Add token to download buttons
-                document.querySelectorAll('#downloadTextBtn, #downloadAudioBtn').forEach(button => {
-                    button.dataset.csrf = csrfToken;
+                const transaction = db.transaction(['recordings'], 'readwrite');
+                const store = transaction.objectStore('recordings');
+                const recording = {
+                    id: id,
+                    blob: blob,
+                    name: name,
+                    date: new Date().toISOString()
+                };
+                
+                store.add(recording);
+            }
+            
+            // Load saved recordings from IndexedDB
+            function loadSavedRecordings() {
+                if (!db) return;
+                
+                const transaction = db.transaction(['recordings'], 'readonly');
+                const store = transaction.objectStore('recordings');
+                const request = store.getAll();
+                
+                request.onsuccess = (event) => {
+                    const recordings = event.target.result;
+                    recordings.forEach(recording => {
+                        const audioUrl = URL.createObjectURL(recording.blob);
+                        
+                        const recordingItem = document.createElement('div');
+                        recordingItem.className = 'recording-item';
+                        recordingItem.innerHTML = `
+                            <div class="recording-info">
+                                <p>${recording.name}</p>
+                            </div>
+                            <div class="recording-actions">
+                                <audio src="${audioUrl}" controls></audio>
+                                <button class="btn-sm btn-primary download-recording" data-id="${recording.id}">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        `;
+                        
+                        savedRecordings.appendChild(recordingItem);
+                        
+                        // Add event listener for download button
+                        recordingItem.querySelector('.download-recording').addEventListener('click', () => {
+                            const a = document.createElement('a');
+                            a.href = audioUrl;
+                            a.download = `${recording.name}.mp3`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        });
+                        
+                        // Add event listener for delete button
+                        recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
+                            if (confirm('Are you sure you want to delete this recording?')) {
+                                deleteRecording(recording.id);
+                                recordingItem.remove();
+                            }
+                        });
+                    });
+                };
+            }
+            
+            // Handle recognition results
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        // Apply grammar correction
+                        const correctedText = correctGrammar(result[0].transcript);
+                        finalTranscript += correctedText;
+                    } else {
+                        interimTranscript += result[0].transcript;
+                    }
+                }
+                
+                // Add final transcript to segments with current speaker
+                if (finalTranscript) {
+                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    transcriptSegments.push({
+                        speaker: speakerName,
+                        speakerClass: speakerClass,
+                        text: finalTranscript.trim()
+                    });
+                    
+                    // Cycle to next speaker for the next segment
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                }
+                
+                // Update display
+                updateTranscriptDisplay(interimTranscript);
+            };
+            
+            // Update the transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                // Add all transcript segments
+                transcriptSegments.forEach(segment => {
+                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
                 });
-            }
-            
-            // Generate CSRF token
-            function generateCSRFToken() {
-                const array = new Uint8Array(16);
-                window.crypto.getRandomValues(array);
-                const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
                 
-                // Store in sessionStorage
-                sessionStorage.setItem('csrfToken', token);
+                // Add interim text if available
+                if (interimText) {
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    // Show grammar correction for interim text if enabled
+                    const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
+                }
                 
-                return token;
+                transcript.innerHTML = html;
+                
+                // Scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
             }
             
-            // Verify CSRF token
-            function verifyCSRFToken(token) {
-                return token === sessionStorage.getItem('csrfToken');
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        statusText.textContent = 'Transcript copied to clipboard';
+                        setTimeout(() => {
+                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
             }
             
-            // Ensure CSP is properly set
-            function ensureCSP() {
-                // This function only applies if HTTP headers aren't set properly
-                // It's a fallback security measure
-                if (!document.querySelector('meta[http-equiv="Content-Security-Policy"]')) {
-                    const meta = document.createElement('meta');
-                    meta.httpEquiv = 'Content-Security-Policy';
-                    meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:;";
-                    document.head.appendChild(meta);
+            // Download transcript as text file
+            function downloadTranscript() {
+                let fullText = '';
+                
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Download the latest audio recording
+            function downloadAudio() {
+                if (audioChunks.length === 0) {
+                    statusText.textContent = 'No audio recording available';
+                    setTimeout(() => {
+                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                    }, 2000);
+                    return;
+                }
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Theme switching functionality
+            function updateTheme(value) {
+                // Remove any existing theme classes
+                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
+                
+                // Update theme container visibility based on discrete mode
+                const themeContainer = document.querySelector('.theme-container');
+                if (parseInt(value) === 2) { // Discrete/Notepad mode
+                    themeContainer.classList.remove('compact-theme-switcher');
+                } else {
+                    themeContainer.classList.add('compact-theme-switcher');
+                }
+                
+                // Add new theme class based on slider value
+                switch (parseInt(value)) {
+                    case 0: // Standard (no class needed)
+                        document.title = "Voice Transcription";
+                        break;
+                    case 1: // Blue Light Filter
+                        document.body.classList.add('blue-light-theme');
+                        document.title = "Voice Transcription";
+                        break;
+                    case 2: // Discrete/Notepad
+                        document.body.classList.add('discrete-theme');
+                        document.title = "My Notes"; // Change page title for added discretion
+                        break;
+                    case 3: // Dark
+                        document.body.classList.add('dark-theme');
+                        document.title = "Voice Transcription";
+                        break;
+                }
+                
+                // Save theme preference to localStorage
+                localStorage.setItem('theme', value);
+            }
+            
+            // Load saved theme preference
+            function loadThemePreference() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme !== null) {
+                    themeSlider.value = savedTheme;
+                    updateTheme(savedTheme);
+                    
+                    // If discrete theme is selected, update the theme container class
+                    if (parseInt(savedTheme) === 2) {
+                        document.querySelector('.theme-container').classList.remove('compact-theme-switcher');
+                    }
                 }
             }
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadTextBtn.addEventListener('click', downloadTranscript);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            
+            // Theme slider event listener
+            themeSlider.addEventListener('input', (e) => {
+                updateTheme(e.target.value);
+            });
+            
+            // Grammar toggle event listener
+            grammarToggle.addEventListener('change', () => {
+                // Update the display to reflect grammar toggle state
+                updateTranscriptDisplay();
+                
+                // Save preference
+                localStorage.setItem('grammarCorrection', grammarToggle.checked);
+            });
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            loadThemePreference();
+            
+            // Load saved grammar correction preference
+            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
+            if (savedGrammarPreference !== null) {
+                grammarToggle.checked = savedGrammarPreference === 'true';
+            }
+            
+            // Manually cycle through speakers (for demo/testing)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
