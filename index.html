@@ -6,239 +6,37 @@
     <title>Live Caption</title>
     <style>
         :root {
-            /* Default theme (Light) */
             --primary-color: #4a6fa5;
             --secondary-color: #166088;
-            --light-color: #f0f5f9;
-            --dark-color: #1e2022;
+            --background-color: #f8f9fa;
+            --container-bg: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
             --accent-color: #47b8e0;
-            --error-color: #e74c3c;
-            --success-color: #2ecc71;
-            --background-color: #f0f5f9;
-            --container-background: white;
-            --text-color: #1e2022;
-            --border-color: #ddd;
-            --transcript-background: #fafafa;
+            --error-color: #dc3545;
+            --success-color: #28a745;
         }
         
         /* Dark theme */
         .dark-theme {
             --primary-color: #6c90c0;
             --secondary-color: #3d8bb3;
-            --light-color: #2c3e50;
-            --dark-color: #ecf0f1;
+            --background-color: #212529;
+            --container-bg: #343a40;
+            --text-color: #f8f9fa;
+            --border-color: #495057;
             --accent-color: #5dade2;
-            --background-color: #1a1a1a;
-            --container-background: #2c3e50;
-            --text-color: #ecf0f1;
-            --border-color: #34495e;
-            --transcript-background: #34495e;
         }
         
-        /* Blue light filter theme */
-        .blue-light-theme {
+        /* Blue light filter */
+        .blue-light-filter {
             --primary-color: #a97142;
             --secondary-color: #88542f;
-            --light-color: #fff1e0;
-            --dark-color: #3d2c20;
-            --accent-color: #c99a6e;
             --background-color: #fff1e0;
-            --container-background: #fff8ee;
+            --container-bg: #fff8ee;
             --text-color: #3d2c20;
             --border-color: #d9c6b0;
-            --transcript-background: #ffeddb;
             filter: sepia(30%) brightness(95%);
-        }
-        
-        /* Discrete theme - Notepad style */
-        .discrete-theme {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --accent-color: #6c757d;
-            --background-color: #f8f9fa;
-            --container-background: #ffffff;
-            --text-color: #343a40;
-            --border-color: #dee2e6;
-            --transcript-background: #ffffff;
-            --notepad-line-color: #e9ecef;
-        }
-        
-        /* Discrete theme UI transformations */
-        .discrete-theme .container {
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-            border-radius: 0;
-            background-image: linear-gradient(#ffffff 29px, var(--notepad-line-color) 1px);
-            background-size: 100% 30px;
-        }
-        
-        .discrete-theme header h1 {
-            font-family: 'Courier New', monospace;
-            color: #000;
-            text-align: left;
-            font-size: 1.5rem;
-            border-bottom: 2px solid #000;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .discrete-theme header p {
-            display: none; /* Hide the recording instruction */
-        }
-        
-        .discrete-theme .theme-switcher {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            overflow: hidden;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            transition: width 0.3s, height 0.3s;
-            z-index: 100;
-        }
-        
-        .discrete-theme .theme-switcher:hover {
-            width: 200px;
-            height: auto;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-        }
-        
-        .discrete-theme .theme-switcher h3 {
-            font-size: 0;
-            margin: 0;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .discrete-theme .theme-switcher:hover h3 {
-            font-size: 1rem;
-            opacity: 1;
-            margin-bottom: 10px;
-        }
-        
-        .discrete-theme .slider-labels {
-            display: none;
-        }
-        
-        .discrete-theme .theme-switcher:hover .slider-labels {
-            display: flex;
-        }
-        
-        .discrete-theme .theme-switcher::before {
-            content: "⚙️";
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .discrete-theme .theme-switcher:hover::before {
-            display: none;
-        }
-        
-        .discrete-theme .controls {
-            justify-content: flex-start;
-            border-top: 1px solid var(--border-color);
-            padding-top: 10px;
-            gap: 5px;
-        }
-        
-        .discrete-theme .btn {
-            border-radius: 0;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            background-color: #f8f9fa;
-            color: #343a40;
-            border: 1px solid #ced4da;
-        }
-        
-        .discrete-theme .btn:hover {
-            background-color: #e9ecef;
-        }
-        
-        .discrete-theme .btn-danger {
-            background-color: #f8f9fa;
-            color: #343a40;
-        }
-        
-        .discrete-theme .btn-danger:hover {
-            background-color: #e9ecef;
-            color: #343a40;
-        }
-        
-        .discrete-theme .status {
-            display: none;
-        }
-        
-        .discrete-theme .speaker-profiles {
-            display: none;
-        }
-        
-        .discrete-theme .transcript-container {
-            border: none;
-            background: transparent;
-            padding: 0;
-            min-height: 200px;
-            margin-top: 5px;
-        }
-        
-        .discrete-theme .transcript-text {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .discrete-theme .export-options {
-            position: absolute;
-            top: 10px;
-            right: 50px;
-            margin: 0;
-            display: flex;
-            gap: 5px;
-        }
-        
-        .discrete-theme .export-options .btn {
-            padding: 2px 5px;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .discrete-theme .export-options .icon {
-            width: 12px;
-            height: 12px;
-        }
-        
-        .discrete-theme .recordings-list {
-            border-top: 1px solid var(--border-color);
-            margin-top: 1rem;
-        }
-        
-        .discrete-theme .recordings-list h3 {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
-        
-        .discrete-theme #recordBtn svg,
-        .discrete-theme #stopBtn svg {
-            display: none;
-        }
-        
-        .discrete-theme #recordBtn::before {
-            content: "📝 Note";
-        }
-        
-        .discrete-theme #stopBtn::before {
-            content: "✓ Done";
         }
         
         * {
@@ -249,321 +47,235 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background-color: var(--background-color);
-            padding: 20px;
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         header {
+            padding: 1rem;
             text-align: center;
-            margin-bottom: 2rem;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--container-bg);
         }
         
         h1 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 500;
         }
         
-        .container {
+        .settings-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+        
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background-color: var(--container-bg);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .settings-panel.active {
+            right: 0;
+        }
+        
+        .close-settings {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+        
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+        
+        .settings-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             max-width: 800px;
             margin: 0 auto;
-            background-color: var(--container-background);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 10px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-        }
-        
-        .btn-primary:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .btn-danger {
-            background-color: var(--error-color);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .icon {
-            width: 18px;
-            height: 18px;
-        }
-        
-        .speaker-profiles {
-            margin-bottom: 1.5rem;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--container-bg);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 60px);
         }
         
         .transcript-container {
-            margin-top: 2rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
-            min-height: 300px;
-            max-height: 60vh;
+            flex: 1;
             overflow-y: auto;
-            background-color: var(--transcript-background);
+            padding: 1rem;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            margin-bottom: 1rem;
         }
         
         .transcript-text {
             white-space: pre-wrap;
             line-height: 1.7;
-            color: var(--text-color);
         }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .left-controls, .right-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .visualizer-container {
+            height: 60px;
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .visualizer {
+            display: flex;
+            align-items: center;
+            height: 40px;
+            width: 100%;
+            max-width: 300px;
+            gap: 4px;
+        }
+        
+        .visualizer-bar {
+            flex: 1;
+            background-color: var(--primary-color);
+            height: 5px;
+            border-radius: 2px;
+        }
+        
+        /* Active recording animation */
+        @keyframes sound-wave {
+            0% {
+                height: 5px;
+            }
+            50% {
+                height: 30px;
+            }
+            100% {
+                height: 5px;
+            }
+        }
+        
+        .recording .visualizer-bar {
+            animation: sound-wave 1s infinite;
+        }
+        
+        .recording .visualizer-bar:nth-child(1) { animation-delay: 0.1s; }
+        .recording .visualizer-bar:nth-child(2) { animation-delay: 0.2s; }
+        .recording .visualizer-bar:nth-child(3) { animation-delay: 0.3s; }
+        .recording .visualizer-bar:nth-child(4) { animation-delay: 0.4s; }
+        .recording .visualizer-bar:nth-child(5) { animation-delay: 0.5s; }
+        .recording .visualizer-bar:nth-child(6) { animation-delay: 0.4s; }
+        .recording .visualizer-bar:nth-child(7) { animation-delay: 0.3s; }
+        .recording .visualizer-bar:nth-child(8) { animation-delay: 0.2s; }
+        .recording .visualizer-bar:nth-child(9) { animation-delay: 0.1s; }
         
         .speaker {
             font-weight: bold;
             margin-right: 6px;
         }
         
-        .speaker-1 {
-            color: var(--primary-color);
-        }
+        .speaker-1 { color: var(--primary-color); }
+        .speaker-2 { color: var(--secondary-color); }
+        .speaker-3 { color: var(--accent-color); }
         
-        .speaker-2 {
-            color: var(--secondary-color);
-        }
-        
-        .speaker-3 {
-            color: var(--accent-color);
-        }
-        
-        .status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin-right: 8px;
-        }
-        
-        .status-recording .status-indicator {
-            background-color: var(--error-color);
-            animation: pulse 1.5s infinite;
-        }
-        
-        .profile-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input, select {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            background-color: var(--container-background);
-            color: var(--text-color);
-        }
-        
-        .add-profile {
-            background-color: var(--success-color);
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .add-profile:hover {
-            background-color: #27ae60;
-        }
-        
-        .export-options {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-        
-        /* Theme switcher styles */
-        .theme-switcher {
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background-color: var(--container-background);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-switcher h3 {
-            margin-bottom: 0.5rem;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
-        }
-        
-        .slider-container {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-        }
-        
-        .slider-label {
-            text-align: center;
-            font-size: 0.7rem;
-            flex: 1;
-            color: var(--text-color);
-        }
-        
-        /* Compact theme switcher */
-        .compact-theme-switcher .theme-switcher {
-            width: 40px;
-            height: 40px;
-            overflow: hidden;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-        }
-        
-        .compact-theme-switcher .theme-switcher::before {
-            content: "⚙️";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover {
-            width: 200px;
-            height: auto;
-            padding: 10px;
-            background-color: var(--container-background);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        
-        .compact-theme-switcher .theme-switcher h3,
-        .compact-theme-switcher .slider-container,
-        .compact-theme-switcher .feature-toggle {
+        .keyboard-container {
             display: none;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
         }
         
-        .compact-theme-switcher .theme-switcher:hover h3,
-        .compact-theme-switcher .theme-switcher:hover .slider-container,
-        .compact-theme-switcher .theme-switcher:hover .feature-toggle {
+        .keyboard-container.visible {
             display: block;
         }
         
-        .compact-theme-switcher .theme-switcher:hover::before {
-            display: none;
-        }
-        
-        .theme-slider {
+        .text-editor {
             width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(to right, 
-                var(--light-color) 0%, 
-                var(--accent-color) 33%, 
-                var(--primary-color) 66%, 
-                var(--dark-color) 100%);
-            outline: none;
-            border-radius: 10px;
+            min-height: 100px;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            background-color: var(--container-bg);
+            color: var(--text-color);
         }
         
-        .theme-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            cursor: pointer;
-        }
-        
-        .theme-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            cursor: pointer;
-            border: none;
-        }
-        
-        /* Grammar correction toggle */
-        .feature-toggle {
-            display: flex;
-            align-items: center;
-            margin-top: 1rem;
-        }
-        
-        .feature-toggle label {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-        
-        .toggle {
+        .toggle-switch {
             position: relative;
             display: inline-block;
             width: 50px;
             height: 24px;
         }
         
-        .toggle input {
+        .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
@@ -594,174 +306,213 @@
         }
         
         input:checked + .toggle-slider {
-            background-color: var(--success-color);
+            background-color: var(--primary-color);
         }
         
         input:checked + .toggle-slider:before {
             transform: translateX(26px);
         }
         
-        /* Grammar correction indicator */
-        .grammar-correction {
-            color: var(--success-color);
-            text-decoration: underline;
-            cursor: help;
-        }
-        
-        /* Audio recordings list */
-        .recordings-list {
-            margin-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-        
-        .recordings-list h3 {
-            color: var(--secondary-color);
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
         }
         
-        .recording-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .recording-info {
+        .setting-item label {
             flex: 1;
         }
         
-        .recording-actions {
+        .export-options {
             display: flex;
-            gap: 5px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         
-        @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                opacity: 1;
-            }
+        .speaker-profiles {
+            margin-bottom: 1rem;
+        }
+        
+        .profile-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .profile-row input, .profile-row select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+        }
+        
+        .add-profile {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .theme-option {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .theme-option.active {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            display: block;
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
+            .settings-panel {
+                width: 85%;
             }
             
             .controls {
                 flex-direction: column;
-                align-items: stretch;
+                gap: 10px;
             }
             
-            .export-options {
-                flex-direction: column;
+            .left-controls, .right-controls {
+                justify-content: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Voice Transcription</h1>
-            <p>Click Record to start capturing audio and generating real-time transcription</p>
-        </header>
-        
-        <div class="theme-container compact-theme-switcher">
-        <div class="theme-switcher">
-            <h3>Interface Mode</h3>
-            <div class="slider-container">
-                <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
-                <div class="slider-labels">
-                    <span class="slider-label">Standard</span>
-                    <span class="slider-label">Blue Light</span>
-                    <span class="slider-label">Notepad</span>
-                    <span class="slider-label">Dark</span>
-                </div>
-            </div>
-            
-            <div class="feature-toggle">
-                <label for="grammarToggle">Grammar Correction:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="grammarToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-        </div>
-    </div>
-        
-        <div class="status">
-            <div class="status-indicator"></div>
-            <span class="status-text">Ready to record</span>
-        </div>
-        
-        <div class="speaker-profiles">
-            <h3>Speaker Profiles</h3>
-            <div class="profile-list">
-                <div class="profile-row">
-                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                </div>
-            </div>
-            <button class="add-profile" id="addProfile">+ Add Speaker</button>
-        </div>
-        
-        <div class="controls">
-            <button id="recordBtn" class="btn btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="6"></circle>
-                </svg>
-                Record
-            </button>
-            
-            <button id="stopBtn" class="btn btn-danger" disabled>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
-                </svg>
-                Stop
-            </button>
-        </div>
-        
+    <header>
+        <h1>Live Caption</h1>
+        <button class="settings-btn">⚙️</button>
+    </header>
+    
+    <div class="main-container">
         <div class="transcript-container">
             <div id="transcript" class="transcript-text"></div>
         </div>
         
-        <div class="export-options">
-            <button id="copyBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                Copy Text
-            </button>
-            <button id="downloadTextBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Download Text
-            </button>
-            <button id="downloadAudioBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18V5l12-2v13"></path>
-                    <circle cx="6" cy="18" r="3"></circle>
-                    <circle cx="18" cy="16" r="3"></circle>
-                </svg>
-                Download Audio
-            </button>
+        <div class="controls">
+            <div class="left-controls">
+                <button id="clearBtn" class="btn btn-outline">Clear</button>
+                <button id="toggleKeyboardBtn" class="btn btn-outline">Show Keyboard</button>
+            </div>
+            <div class="right-controls">
+                <button id="recordBtn" class="btn">Start Recording</button>
+                <button id="stopBtn" class="btn" disabled>Stop</button>
+            </div>
         </div>
         
-        <div class="recordings-list">
-            <h3>Saved Recordings</h3>
-            <div id="savedRecordings"></div>
+        <div class="keyboard-container">
+            <textarea id="textEditor" class="text-editor" placeholder="Type or edit text here..."></textarea>
+            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                <button id="saveEditsBtn" class="btn">Save Edits</button>
+            </div>
+        </div>
+        
+        <div class="visualizer-container">
+            <div class="visualizer">
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+                <div class="visualizer-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overlay"></div>
+    
+    <div class="settings-panel">
+        <button class="close-settings">×</button>
+        <h2>Settings</h2>
+        
+        <div class="settings-section">
+            <h2>Appearance</h2>
+            <div class="theme-selector">
+                <div class="theme-option active" data-theme="light">Light</div>
+                <div class="theme-option" data-theme="dark">Dark</div>
+                <div class="theme-option" data-theme="blue-light">Blue Light Filter</div>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Speaker Profiles</h2>
+            <div class="speaker-profiles">
+                <div class="profile-list">
+                    <div class="profile-row">
+                        <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
+                        <select class="profile-voice">
+                            <option value="default">Default Voice</option>
+                            <option value="deep-male">Deep Male</option>
+                            <option value="high-female">High Female</option>
+                            <option value="neutral">Neutral</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="add-profile" id="addProfile">+ Add Speaker</button>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Features</h2>
+            <div class="setting-item">
+                <label for="grammarToggle">Grammar Correction</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="grammarToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <label for="autoSwitchSpeaker">Auto-switch Speakers</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoSwitchSpeaker" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Export Options</h2>
+            <div class="export-options">
+                <button id="copyBtn" class="btn">Copy Text</button>
+                <button id="downloadTextBtn" class="btn">Download Text</button>
+                <button id="downloadAudioBtn" class="btn">Download Audio</button>
+            </div>
         </div>
     </div>
 
@@ -770,19 +521,35 @@
             // DOM Elements
             const recordBtn = document.getElementById('recordBtn');
             const stopBtn = document.getElementById('stopBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const toggleKeyboardBtn = document.getElementById('toggleKeyboardBtn');
             const transcript = document.getElementById('transcript');
-            const statusText = document.querySelector('.status-text');
-            const status = document.querySelector('.status');
+            const textEditor = document.getElementById('textEditor');
+            const saveEditsBtn = document.getElementById('saveEditsBtn');
+            const keyboardContainer = document.querySelector('.keyboard-container');
+            const visualizer = document.querySelector('.visualizer');
             const copyBtn = document.getElementById('copyBtn');
             const downloadTextBtn = document.getElementById('downloadTextBtn');
             const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+            const settingsBtn = document.querySelector('.settings-btn');
+            const closeSettingsBtn = document.querySelector('.close-settings');
+            const settingsPanel = document.querySelector('.settings-panel');
+            const overlay = document.querySelector('.overlay');
             const addProfileBtn = document.getElementById('addProfile');
             const profileList = document.querySelector('.profile-list');
-            const themeSlider = document.getElementById('themeSlider');
+            const themeOptions = document.querySelectorAll('.theme-option');
             const grammarToggle = document.getElementById('grammarToggle');
-            const savedRecordings = document.getElementById('savedRecordings');
+            const autoSwitchSpeaker = document.getElementById('autoSwitchSpeaker');
             
-            // Grammar correction dictionary (Simple example)
+            // State variables
+            let isRecording = false;
+            let currentSpeakerIndex = 0;
+            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
+            let transcriptSegments = [];
+            let audioChunks = [];
+            let mediaRecorder = null;
+            
+            // Grammar correction dictionary
             const grammarCorrections = {
                 "i ": "I ",
                 "i'm": "I'm",
@@ -809,7 +576,6 @@
             if (!window.SpeechRecognition) {
                 alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
                 recordBtn.disabled = true;
-                statusText.textContent = "Speech recognition not supported";
                 return;
             }
             
@@ -821,42 +587,98 @@
             recognition.lang = 'en-US';
             recognition.maxAlternatives = 3;
             
-            // State variables
-            let isRecording = false;
-            let currentSpeakerIndex = 0;
-            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
-            let transcriptSegments = [];
-            let audioChunks = [];
-            let mediaRecorder = null;
+            // Functions
             
-            // Initialize speaker voices dropdown
-            function populateVoiceList() {
-                const voiceSelects = document.querySelectorAll('.profile-voice');
+            // Settings panel toggle
+            function toggleSettingsPanel() {
+                settingsPanel.classList.toggle('active');
+                overlay.classList.toggle('active');
+            }
+            
+            // Theme switching
+            function setTheme(theme) {
+                document.body.classList.remove('dark-theme', 'blue-light-filter');
                 
-                // Add some sample voice profiles
-                const voiceProfiles = [
-                    'Default Voice Profile', 
-                    'Deep Male Voice', 
-                    'High Female Voice',
-                    'Neutral Voice',
-                    'British Accent',
-                    'American Accent'
-                ];
-                
-                voiceSelects.forEach(select => {
-                    // Clear existing options first
-                    while(select.firstChild) {
-                        select.removeChild(select.firstChild);
-                    }
-                    
-                    // Add voice profiles
-                    voiceProfiles.forEach((profile, index) => {
-                        const option = document.createElement('option');
-                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = profile;
-                        select.appendChild(option);
-                    });
+                themeOptions.forEach(option => {
+                    option.classList.remove('active');
                 });
+                
+                const selectedOption = document.querySelector(`[data-theme="${theme}"]`);
+                if (selectedOption) {
+                    selectedOption.classList.add('active');
+                }
+                
+                if (theme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                } else if (theme === 'blue-light') {
+                    document.body.classList.add('blue-light-filter');
+                }
+                
+                localStorage.setItem('theme', theme);
+            }
+            
+            // Keyboard toggle
+            function toggleKeyboard() {
+                keyboardContainer.classList.toggle('visible');
+                if (keyboardContainer.classList.contains('visible')) {
+                    toggleKeyboardBtn.textContent = 'Hide Keyboard';
+                    textEditor.value = getTranscriptText();
+                } else {
+                    toggleKeyboardBtn.textContent = 'Show Keyboard';
+                }
+            }
+            
+            // Get full transcript text
+            function getTranscriptText() {
+                let fullText = '';
+                transcriptSegments.forEach(segment => {
+                    fullText += `${segment.speaker}: ${segment.text}\n`;
+                });
+                return fullText;
+            }
+            
+            // Save edits from the text editor
+            function saveEdits() {
+                // Parse the edited text to update transcript segments
+                const lines = textEditor.value.trim().split('\n');
+                transcriptSegments = [];
+                
+                lines.forEach(line => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > 0) {
+                        const speaker = line.substring(0, colonIndex).trim();
+                        const text = line.substring(colonIndex + 1).trim();
+                        
+                        // Find speaker index to determine class
+                        let speakerIndex = speakerProfiles.findIndex(profile => profile.name === speaker);
+                        if (speakerIndex === -1) {
+                            // If speaker not found, add it
+                            speakerProfiles.push({ name: speaker, voice: 'default' });
+                            speakerIndex = speakerProfiles.length - 1;
+                        }
+                        
+                        const speakerClass = `speaker-${(speakerIndex % 3) + 1}`;
+                        
+                        transcriptSegments.push({
+                            speaker,
+                            speakerClass,
+                            text
+                        });
+                    } else if (line.trim()) {
+                        // If line doesn't have a colon but isn't empty, add it as current speaker
+                        const speaker = speakerProfiles[currentSpeakerIndex].name;
+                        const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                        
+                        transcriptSegments.push({
+                            speaker,
+                            speakerClass,
+                            text: line.trim()
+                        });
+                    }
+                });
+                
+                updateTranscriptDisplay();
+                toggleKeyboard();
             }
             
             // Add a new speaker profile
@@ -867,15 +689,15 @@
                 profileRow.innerHTML = `
                     <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
                     <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
+                        <option value="default">Default Voice</option>
+                        <option value="deep-male">Deep Male</option>
+                        <option value="high-female">High Female</option>
+                        <option value="neutral">Neutral</option>
                     </select>
                 `;
                 
                 profileList.appendChild(profileRow);
                 speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
-                
-                // Update the voice options
-                populateVoiceList();
                 
                 // Update event listeners for the new inputs
                 updateProfileEventListeners();
@@ -890,6 +712,7 @@
                     input.addEventListener('change', () => {
                         if (speakerProfiles[index]) {
                             speakerProfiles[index].name = input.value;
+                            updateTranscriptDisplay(); // Update display to reflect name changes
                         }
                     });
                 });
@@ -934,10 +757,10 @@
                             try {
                                 recognition.start();
                                 isRecording = true;
-                                status.classList.add('status-recording');
-                                statusText.textContent = 'Recording...';
+                                visualizer.classList.add('recording');
                                 recordBtn.disabled = true;
                                 stopBtn.disabled = false;
+                                recordBtn.textContent = 'Recording...';
                                 
                                 // Create media recorder for audio recording
                                 mediaRecorder = new MediaRecorder(stream);
@@ -948,26 +771,18 @@
                                 };
                                 
                                 mediaRecorder.start();
-                                
-                                mediaRecorder.onstop = () => {
-                                    // Save audio recording
-                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                                    saveRecording(audioBlob);
-                                    audioChunks = [];
-                                };
                             } catch (recognitionError) {
                                 console.error('Error starting recognition:', recognitionError);
-                                statusText.textContent = 'Error starting recognition';
+                                alert('Error starting speech recognition. Please try again.');
                             }
                         })
                         .catch(micError => {
                             console.error('Microphone permission denied:', micError);
-                            statusText.textContent = 'Microphone permission denied';
                             alert("You need to allow microphone access to use the voice transcription feature.");
                         });
                 } catch (error) {
                     console.error('Error requesting microphone:', error);
-                    statusText.textContent = 'Error requesting microphone';
+                    alert('Error accessing microphone. Please try again.');
                 }
             }
             
@@ -979,155 +794,120 @@
                 
                 recognition.stop();
                 isRecording = false;
-                status.classList.remove('status-recording');
-                statusText.textContent = 'Recording stopped';
+                visualizer.classList.remove('recording');
                 recordBtn.disabled = false;
                 stopBtn.disabled = true;
+                recordBtn.textContent = 'Start Recording';
             }
             
-            // Save recording to cookies and display in recordings list
-            function saveRecording(audioBlob) {
-                const recordingId = 'recording_' + Date.now();
-                const recordingName = `Recording ${new Date().toLocaleString()}`;
-                const audioUrl = URL.createObjectURL(audioBlob);
-                
-                // Create HTML for recording
-                const recordingItem = document.createElement('div');
-                recordingItem.className = 'recording-item';
-                recordingItem.innerHTML = `
-                    <div class="recording-info">
-                        <p>${recordingName}</p>
-                    </div>
-                    <div class="recording-actions">
-                        <audio src="${audioUrl}" controls></audio>
-                        <button class="btn-sm btn-primary download-recording" data-id="${recordingId}">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
-                        <button class="btn-sm btn-danger delete-recording" data-id="${recordingId}">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </div>
-                `;
-                
-                savedRecordings.appendChild(recordingItem);
-                
-                // Save to IndexedDB (more reliable than cookies for binary data)
-                saveToIndexedDB(recordingId, audioBlob, recordingName);
-                
-                // Add event listener for download button
-                recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = audioUrl;
-                    a.download = `${recordingName}.mp3`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-                
-                // Add event listener for delete button
-                recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                    if (confirm('Are you sure you want to delete this recording?')) {
-                        deleteRecording(recordingId);
-                        recordingItem.remove();
-                    }
-                });
-            }
-            
-            // IndexedDB setup for saving recordings
-            let db;
-            const request = indexedDB.open('RecordingsDB', 1);
-            
-            request.onerror = (event) => {
-                console.error('Error opening IndexedDB:', event.target.error);
-            };
-            
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains('recordings')) {
-                    db.createObjectStore('recordings', { keyPath: 'id' });
+            // Clear transcript
+            function clearTranscript() {
+                if (confirm('Are you sure you want to clear the transcript? This cannot be undone.')) {
+                    transcriptSegments = [];
+                    updateTranscriptDisplay();
                 }
-            };
-            
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadSavedRecordings();
-            };
-            
-            // Save recording to IndexedDB
-            function saveToIndexedDB(id, blob, name) {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readwrite');
-                const store = transaction.objectStore('recordings');
-                const recording = {
-                    id: id,
-                    blob: blob,
-                    name: name,
-                    date: new Date().toISOString()
-                };
-                
-                store.add(recording);
             }
             
-            // Load saved recordings from IndexedDB
-            function loadSavedRecordings() {
-                if (!db) return;
+            // Update the transcript display
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
                 
-                const transaction = db.transaction(['recordings'], 'readonly');
-                const store = transaction.objectStore('recordings');
-                const request = store.getAll();
+                // Add all transcript segments
+                transcriptSegments.forEach(segment => {
+                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                });
                 
-                request.onsuccess = (event) => {
-                    const recordings = event.target.result;
-                    recordings.forEach(recording => {
-                        const audioUrl = URL.createObjectURL(recording.blob);
-                        
-                        const recordingItem = document.createElement('div');
-                        recordingItem.className = 'recording-item';
-                        recordingItem.innerHTML = `
-                            <div class="recording-info">
-                                <p>${recording.name}</p>
-                            </div>
-                            <div class="recording-actions">
-                                <audio src="${audioUrl}" controls></audio>
-                                <button class="btn-sm btn-primary download-recording" data-id="${recording.id}">
-                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="7 10 12 15 17 10"></polyline>
-                                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                        
-                        savedRecordings.appendChild(recordingItem);
-                        
-                        // Add event listener for download button
-                        recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                            const a = document.createElement('a');
-                            a.href = audioUrl;
-                            a.download = `${recording.name}.mp3`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        });
-                        
-                        // Add event listener for delete button
-                        recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                            if (confirm('Are you sure you want to delete this recording?')) {
-                                deleteRecording(recording.id);
-                                recordingItem.remove();
-                            }
-                        });
+                // Add interim text if available
+                if (interimText) {
+                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    
+                    // Show grammar correction for interim text if enabled
+                    const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
+                }
+                
+                transcript.innerHTML = html;
+                
+                // Scroll to bottom
+                transcript.scrollTop = transcript.scrollHeight;
+            }
+            
+            // Copy transcript to clipboard
+            function copyTranscript() {
+                let fullText = getTranscriptText();
+                
+                navigator.clipboard.writeText(fullText)
+                    .then(() => {
+                        alert('Transcript copied to clipboard');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
                     });
-                };
+            }
+            
+            // Download transcript as text file
+            function downloadTranscript() {
+                let fullText = getTranscriptText();
+                
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Download the audio recording
+            function downloadAudio() {
+                if (audioChunks.length === 0) {
+                    alert('No audio recording available');
+                    return;
+                }
+                
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(audioBlob);
+                const a = document.createElement('a');
+                
+                a.href = url;
+                a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Load saved settings
+            function loadSavedSettings() {
+                // Load theme
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme) {
+                    setTheme(savedTheme);
+                }
+                
+                // Load grammar correction preference
+                const savedGrammar = localStorage.getItem('grammarCorrection');
+                if (savedGrammar !== null) {
+                    grammarToggle.checked = savedGrammar === 'true';
+                }
+                
+                // Load auto-switch speaker preference
+                const savedAutoSwitch = localStorage.getItem('autoSwitchSpeaker');
+                if (savedAutoSwitch !== null) {
+                    autoSwitchSpeaker.checked = savedAutoSwitch === 'true';
+                }
             }
             
             // Handle recognition results
@@ -1157,227 +937,150 @@
                         text: finalTranscript.trim()
                     });
                     
-                    // Cycle to next speaker for the next segment
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    // Auto-switch speaker if enabled
+                    if (autoSwitchSpeaker.checked && speakerProfiles.length > 1) {
+                        // Detect potential speaker change based on pause pattern
+                        // This is a simple implementation that could be enhanced
+                        if (finalTranscript.endsWith('.') || 
+                            finalTranscript.endsWith('?') || 
+                            finalTranscript.endsWith('!')) {
+                            currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                        }
+                    }
                 }
                 
                 // Update display
                 updateTranscriptDisplay(interimTranscript);
             };
             
-            // Update the transcript display
-            function updateTranscriptDisplay(interimText = '') {
-                let html = '';
+            // Recognition error handler
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
                 
-                // Add all transcript segments
-                transcriptSegments.forEach(segment => {
-                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
-                });
-                
-                // Add interim text if available
-                if (interimText) {
-                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    // Show grammar correction for interim text if enabled
-                    const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
-                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
-                }
-                
-                transcript.innerHTML = html;
-                
-                // Scroll to bottom
-                transcript.scrollTop = transcript.scrollHeight;
-            }
-            
-            // Copy transcript to clipboard
-            function copyTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                navigator.clipboard.writeText(fullText)
-                    .then(() => {
-                        statusText.textContent = 'Transcript copied to clipboard';
-                        setTimeout(() => {
-                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text: ', err);
-                    });
-            }
-            
-            // Download transcript as text file
-            function downloadTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                const blob = new Blob([fullText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            // Download the latest audio recording
-            function downloadAudio() {
-                if (audioChunks.length === 0) {
-                    statusText.textContent = 'No audio recording available';
-                    setTimeout(() => {
-                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                    }, 2000);
-                    return;
-                }
-                
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                const url = URL.createObjectURL(audioBlob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            // Theme switching functionality
-            function updateTheme(value) {
-                // Remove any existing theme classes
-                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
-                
-                // Update theme container visibility based on discrete mode
-                const themeContainer = document.querySelector('.theme-container');
-                if (parseInt(value) === 2) { // Discrete/Notepad mode
-                    themeContainer.classList.remove('compact-theme-switcher');
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    alert("No speech detected. Please try again.");
+                } else if (event.error === 'network') {
+                    alert("Network error occurred. Please check your connection.");
                 } else {
-                    themeContainer.classList.add('compact-theme-switcher');
+                    alert(`Speech recognition error: ${event.error}`);
                 }
                 
-                // Add new theme class based on slider value
-                switch (parseInt(value)) {
-                    case 0: // Standard (no class needed)
-                        document.title = "Voice Transcription";
-                        break;
-                    case 1: // Blue Light Filter
-                        document.body.classList.add('blue-light-theme');
-                        document.title = "Voice Transcription";
-                        break;
-                    case 2: // Discrete/Notepad
-                        document.body.classList.add('discrete-theme');
-                        document.title = "My Notes"; // Change page title for added discretion
-                        break;
-                    case 3: // Dark
-                        document.body.classList.add('dark-theme');
-                        document.title = "Voice Transcription";
-                        break;
-                }
-                
-                // Save theme preference to localStorage
-                localStorage.setItem('theme', value);
-            }
+                stopRecording();
+            };
             
-            // Load saved theme preference
-            function loadThemePreference() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme !== null) {
-                    themeSlider.value = savedTheme;
-                    updateTheme(savedTheme);
-                    
-                    // If discrete theme is selected, update the theme container class
-                    if (parseInt(savedTheme) === 2) {
-                        document.querySelector('.theme-container').classList.remove('compact-theme-switcher');
+            // Restart recognition if it stops while we're still recording
+            recognition.onend = () => {
+                if (isRecording) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error('Error restarting recognition:', e);
+                        stopRecording();
                     }
                 }
-            }
+            };
             
             // Event Listeners
             recordBtn.addEventListener('click', startRecording);
             stopBtn.addEventListener('click', stopRecording);
+            clearBtn.addEventListener('click', clearTranscript);
+            toggleKeyboardBtn.addEventListener('click', toggleKeyboard);
+            saveEditsBtn.addEventListener('click', saveEdits);
             copyBtn.addEventListener('click', copyTranscript);
             downloadTextBtn.addEventListener('click', downloadTranscript);
             downloadAudioBtn.addEventListener('click', downloadAudio);
             addProfileBtn.addEventListener('click', addSpeakerProfile);
             
-            // Theme slider event listener
-            themeSlider.addEventListener('input', (e) => {
-                updateTheme(e.target.value);
+            // Settings panel toggle
+            settingsBtn.addEventListener('click', toggleSettingsPanel);
+            closeSettingsBtn.addEventListener('click', toggleSettingsPanel);
+            overlay.addEventListener('click', toggleSettingsPanel);
+            
+            // Theme options
+            themeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    setTheme(option.getAttribute('data-theme'));
+                });
             });
             
-            // Grammar toggle event listener
+            // Save preferences when toggled
             grammarToggle.addEventListener('change', () => {
-                // Update the display to reflect grammar toggle state
-                updateTranscriptDisplay();
-                
-                // Save preference
                 localStorage.setItem('grammarCorrection', grammarToggle.checked);
             });
             
-            // Recognition event handlers
-            recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
-                statusText.textContent = `Error: ${event.error}`;
-                stopRecording();
-                
-                // Show a more helpful message for common errors
-                if (event.error === 'not-allowed') {
-                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
-                } else if (event.error === 'no-speech') {
-                    statusText.textContent = "No speech detected. Please try again.";
-                } else if (event.error === 'network') {
-                    statusText.textContent = "Network error occurred. Please check your connection.";
-                }
-            };
+            autoSwitchSpeaker.addEventListener('change', () => {
+                localStorage.setItem('autoSwitchSpeaker', autoSwitchSpeaker.checked);
+            });
             
-            recognition.onend = () => {
-                if (isRecording) {
-                    recognition.start();
-                }
-            };
-            
-            // Initial setup
-            populateVoiceList();
-            updateProfileEventListeners();
-            loadThemePreference();
-            
-            // Load saved grammar correction preference
-            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
-            if (savedGrammarPreference !== null) {
-                grammarToggle.checked = savedGrammarPreference === 'true';
-            }
-            
-            // Manually cycle through speakers (for demo/testing)
+            // Manual speaker change with keyboard shortcut (Tab key)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Tab' && isRecording) {
                     e.preventDefault();
                     currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
-                    
-                    setTimeout(() => {
-                        statusText.textContent = 'Recording...';
-                    }, 1500);
+                    alert(`Switched to ${speakerProfiles[currentSpeakerIndex].name}`);
                 }
             });
+            
+            // Initialize
+            updateProfileEventListeners();
+            loadSavedSettings();
+            
+            // Create a real-time voice visualizer with Web Audio API
+            function setupVisualizer(stream) {
+                if (!stream) return;
+                
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyser = audioContext.createAnalyser();
+                const microphone = audioContext.createMediaStreamSource(stream);
+                
+                microphone.connect(analyser);
+                analyser.fftSize = 256;
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                const bars = document.querySelectorAll('.visualizer-bar');
+                const barCount = bars.length;
+                
+                function updateVisualizer() {
+                    if (!isRecording) return;
+                    
+                    analyser.getByteFrequencyData(dataArray);
+                    
+                    // Select frequencies for visualization (simplify by using a subset of frequency bins)
+                    for (let i = 0; i < barCount; i++) {
+                        const index = Math.floor(i * (bufferLength / barCount));
+                        const value = dataArray[index];
+                        
+                        // Calculate height based on frequency value (0-255)
+                        const height = Math.max(5, (value / 255) * 40);
+                        
+                        // Update bar height
+                        bars[i].style.height = `${height}px`;
+                    }
+                    
+                    requestAnimationFrame(updateVisualizer);
+                }
+                
+                updateVisualizer();
+            }
+            
+            // Enhance the start recording function to include visualizer
+            const originalStartRecording = startRecording;
+            startRecording = function() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        // Setup audio visualizer with stream
+                        setupVisualizer(stream);
+                        
+                        // Call the original function
+                        originalStartRecording();
+                    })
+                    .catch(error => {
+                        console.error('Error accessing microphone:', error);
+                        alert('Error accessing microphone. Please check permissions and try again.');
+                    });
+            };
         });
-    </script>
-</body>
-</html>
