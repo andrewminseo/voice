@@ -1461,4 +1461,136 @@
                 
                 a.href = url;
                 a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
-                doc
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 0);
+            }
+            
+            // Theme switching functionality
+            function updateTheme(value) {
+                // Remove any existing theme classes
+                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
+                
+                // Update theme container visibility based on discrete mode
+                const themeContainer = document.querySelector('.theme-container');
+                if (parseInt(value) === 2) { // Discrete/Notepad mode
+                    themeContainer.classList.remove('compact-theme-switcher');
+                } else {
+                    themeContainer.classList.add('compact-theme-switcher');
+                }
+                
+                // Add new theme class based on slider value
+                switch (parseInt(value)) {
+                    case 0: // Standard (no class needed)
+                        document.title = "Live Caption";
+                        break;
+                    case 1: // Blue Light Filter
+                        document.body.classList.add('blue-light-theme');
+                        document.title = "Live Caption";
+                        break;
+                    case 2: // Discrete/Notepad
+                        document.body.classList.add('discrete-theme');
+                        document.title = "My Notes"; // Change page title for added discretion
+                        break;
+                    case 3: // Dark
+                        document.body.classList.add('dark-theme');
+                        document.title = "Live Caption";
+                        break;
+                }
+                
+                // Save theme preference to localStorage
+                localStorage.setItem('theme', value);
+            }
+            
+            // Load saved theme preference
+            function loadThemePreference() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme !== null) {
+                    themeSlider.value = savedTheme;
+                    updateTheme(savedTheme);
+                    
+                    // If discrete theme is selected, update the theme container class
+                    if (parseInt(savedTheme) === 2) {
+                        document.querySelector('.theme-container').classList.remove('compact-theme-switcher');
+                    }
+                }
+            }
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadTextBtn.addEventListener('click', downloadTranscript);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            clearBtn.addEventListener('click', clearTranscript);
+            hideKeyboardBtn.addEventListener('click', hideKeyboard);
+            
+            // Theme slider event listener
+            themeSlider.addEventListener('input', (e) => {
+                updateTheme(e.target.value);
+            });
+            
+            // Grammar toggle event listener
+            grammarToggle.addEventListener('change', () => {
+                // Update the display to reflect grammar toggle state
+                updateTranscriptDisplay();
+                
+                // Save preference
+                localStorage.setItem('grammarCorrection', grammarToggle.checked);
+            });
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            loadThemePreference();
+            
+            // Load saved grammar correction preference
+            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
+            if (savedGrammarPreference !== null) {
+                grammarToggle.checked = savedGrammarPreference === 'true';
+            }
+            
+            // Hide cursor initially
+            cursor.style.display = 'none';
+            
+            // Manually cycle through speakers (for demo/testing)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+        });
