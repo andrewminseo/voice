@@ -1359,4 +1359,104 @@
             // Theme switching functionality
             function updateTheme(value) {
                 // Remove any existing theme classes
-                document.body.classList.remove('dark-theme',
+                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
+                
+                // Add new theme class based on slider value
+                switch (parseInt(value)) {
+                    case 0: // Standard (no class needed)
+                        document.title = "Live Caption";
+                        break;
+                    case 1: // Blue Light Filter
+                        document.body.classList.add('blue-light-theme');
+                        document.title = "Live Caption";
+                        break;
+                    case 2: // Discrete/Notepad
+                        document.body.classList.add('discrete-theme');
+                        document.title = "My Notes"; // Change page title for added discretion
+                        break;
+                    case 3: // Dark
+                        document.body.classList.add('dark-theme');
+                        document.title = "Live Caption";
+                        break;
+                }
+                
+                // Save theme preference to localStorage
+                localStorage.setItem('theme', value);
+            }
+            
+            // Load saved theme preference
+            function loadThemePreference() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme !== null) {
+                    themeSlider.value = savedTheme;
+                    updateTheme(savedTheme);
+                }
+            }
+            
+            // Event Listeners
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadTextBtn.addEventListener('click', downloadTranscript);
+            downloadAudioBtn.addEventListener('click', downloadAudio);
+            addProfileBtn.addEventListener('click', addSpeakerProfile);
+            
+            // Theme slider event listener
+            themeSlider.addEventListener('input', (e) => {
+                updateTheme(e.target.value);
+            });
+            
+            // Grammar toggle event listener
+            grammarToggle.addEventListener('change', () => {
+                // Save preference
+                localStorage.setItem('grammarCorrection', grammarToggle.checked);
+            });
+            
+            // Recognition event handlers
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusText.textContent = `Error: ${event.error}`;
+                stopRecording();
+                
+                // Show a more helpful message for common errors
+                if (event.error === 'not-allowed') {
+                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
+                } else if (event.error === 'no-speech') {
+                    statusText.textContent = "No speech detected. Please try again.";
+                } else if (event.error === 'network') {
+                    statusText.textContent = "Network error occurred. Please check your connection.";
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isRecording) {
+                    // Restart recognition if we're still in recording mode
+                    // This helps with continuous recognition
+                    recognition.start();
+                }
+            };
+            
+            // Manually cycle through speakers (for demo/testing)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Tab' && isRecording) {
+                    e.preventDefault();
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
+                    
+                    setTimeout(() => {
+                        statusText.textContent = 'Recording...';
+                    }, 1500);
+                }
+            });
+            
+            // Initial setup
+            populateVoiceList();
+            updateProfileEventListeners();
+            loadThemePreference();
+            
+            // Load saved grammar correction preference
+            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
+            if (savedGrammarPreference !== null) {
+                grammarToggle.checked = savedGrammarPreference === 'true';
+            }
+        });
