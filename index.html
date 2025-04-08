@@ -1,69 +1,65 @@
-
-    </script>
-</body>
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Transcription</title>
+    <title>Live Transcription</title>
     <style>
         :root {
             /* Default theme (Light) */
-            --primary-color: #4361ee;
-            --primary-hover: #3a56d4;
-            --secondary-color: #3f37c9;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --accent-color: #4cc9f0;
-            --error-color: #e63946;
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --light-color: #f0f5f9;
+            --dark-color: #1e2022;
+            --accent-color: #47b8e0;
+            --error-color: #e74c3c;
             --success-color: #2ecc71;
-            --warning-color: #f77f00;
-            --background-color: #f8f9fa;
+            --background-color: #f0f5f9;
             --container-background: white;
-            --text-color: #212529;
-            --border-color: #dee2e6;
-            --transcript-background: #f8f9fa;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition-speed: 0.3s;
+            --text-color: #1e2022;
+            --border-color: #ddd;
+            --transcript-background: #fafafa;
+            --waveform-color: #4a6fa5;
+            --waveform-bg: rgba(74, 111, 165, 0.1);
         }
         
         /* Dark theme */
         .dark-theme {
-            --primary-color: #4361ee;
-            --primary-hover: #3a56d4;
-            --secondary-color: #3f37c9;
-            --light-color: #f8f9fa;
-            --dark-color: #e9ecef;
-            --accent-color: #4cc9f0;
+            --primary-color: #6c90c0;
+            --secondary-color: #3d8bb3;
+            --light-color: #2c3e50;
+            --dark-color: #ecf0f1;
+            --accent-color: #5dade2;
             --background-color: #1a1a1a;
             --container-background: #2c3e50;
-            --text-color: #e9ecef;
-            --border-color: #495057;
-            --transcript-background: #343a40;
+            --text-color: #ecf0f1;
+            --border-color: #34495e;
+            --transcript-background: #34495e;
+            --waveform-color: #5dade2;
+            --waveform-bg: rgba(93, 173, 226, 0.2);
         }
         
         /* Blue light filter theme */
         .blue-light-theme {
-            --primary-color: #9d4edd;
-            --primary-hover: #7b2cbf;
-            --secondary-color: #5a189a;
-            --light-color: #fff1e6;
+            --primary-color: #a97142;
+            --secondary-color: #88542f;
+            --light-color: #fff1e0;
             --dark-color: #3d2c20;
-            --accent-color: #c77dff;
-            --background-color: #fff1e6;
-            --container-background: #fff8f3;
+            --accent-color: #c99a6e;
+            --background-color: #fff1e0;
+            --container-background: #fff8ee;
             --text-color: #3d2c20;
             --border-color: #d9c6b0;
             --transcript-background: #ffeddb;
+            --waveform-color: #a97142;
+            --waveform-bg: rgba(169, 113, 66, 0.1);
             filter: sepia(30%) brightness(95%);
         }
         
         /* Discrete theme - Notepad style */
         .discrete-theme {
-            --primary-color: #495057;
-            --primary-hover: #343a40;
-            --secondary-color: #6c757d;
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
             --light-color: #f8f9fa;
             --dark-color: #343a40;
             --accent-color: #6c757d;
@@ -73,17 +69,230 @@
             --border-color: #dee2e6;
             --transcript-background: #ffffff;
             --notepad-line-color: #e9ecef;
+            --waveform-color: #6c757d;
+            --waveform-bg: rgba(108, 117, 125, 0.1);
+        }
+        
+        /* Discrete theme UI transformations */
+        .discrete-theme .container {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+            padding: 1rem;
+            border-radius: 0;
+            background-image: linear-gradient(#ffffff 29px, var(--notepad-line-color) 1px);
+            background-size: 100% 30px;
+        }
+        
+        .discrete-theme header h1 {
+            font-family: 'Courier New', monospace;
+            color: #000;
+            text-align: left;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .discrete-theme header p {
+            display: none; /* Hide the recording instruction */
+        }
+        
+        .discrete-theme .theme-switcher {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            overflow: hidden;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            transition: width 0.3s, height 0.3s;
+            z-index: 100;
+        }
+        
+        .discrete-theme .theme-switcher:hover {
+            width: 200px;
+            height: auto;
+            padding: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .discrete-theme .theme-switcher h3 {
+            font-size: 0;
+            margin: 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .discrete-theme .theme-switcher:hover h3 {
+            font-size: 1rem;
+            opacity: 1;
+            margin-bottom: 10px;
+        }
+        
+        .discrete-theme .slider-labels {
+            display: none;
+        }
+        
+        .discrete-theme .theme-switcher:hover .slider-labels {
+            display: flex;
+        }
+        
+        .discrete-theme .theme-switcher::before {
+            content: "⚙️";
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .discrete-theme .theme-switcher:hover::before {
+            display: none;
+        }
+        
+        .discrete-theme .controls {
+            justify-content: flex-start;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            gap: 5px;
+        }
+        
+        .discrete-theme .btn {
+            border-radius: 0;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            background-color: #f8f9fa;
+            color: #343a40;
+            border: 1px solid #ced4da;
+        }
+        
+        .discrete-theme .btn:hover {
+            background-color: #e9ecef;
+        }
+        
+        .discrete-theme .btn-danger {
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        
+        .discrete-theme .btn-danger:hover {
+            background-color: #e9ecef;
+            color: #343a40;
+        }
+        
+        .discrete-theme .status {
+            display: none;
+        }
+        
+        .discrete-theme .speaker-profiles {
+            display: none;
+        }
+        
+        .discrete-theme .transcript-container {
+            border: none;
+            background: transparent;
+            padding: 0;
+            min-height: 200px;
+            margin-top: 5px;
+        }
+        
+        .discrete-theme .transcript-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .discrete-theme .export-options {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            margin: 0;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .discrete-theme .export-options .btn {
+            padding: 2px 5px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .discrete-theme .export-options .icon {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .discrete-theme .recordings-list {
+            border-top: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+        
+        .discrete-theme .recordings-list h3 {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        .discrete-theme #recordBtn svg,
+        .discrete-theme #stopBtn svg {
+            display: none;
+        }
+        
+        .discrete-theme #recordBtn::before {
+            content: "📝 Note";
+        }
+        
+        .discrete-theme #stopBtn::before {
+            content: "✓ Done";
+        }
+        
+        /* Waveform visualization */
+        .waveform-container {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 1.5rem;
+            background-color: var(--waveform-bg);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .waveform-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .waveform-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        .discrete-theme .waveform-container {
+            display: none;
         }
         
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed), box-shadow var(--transition-speed);
+            transition: background-color 0.3s, color 0.3s;
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: var(--text-color);
             background-color: var(--background-color);
@@ -95,54 +304,20 @@
             margin-bottom: 2rem;
         }
         
-        h1, h2, h3, h4, h5, h6 {
-            color: var(--primary-color);
-            font-weight: 600;
-            line-height: 1.3;
-        }
-        
         h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        p {
-            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             background-color: var(--container-background);
             padding: 2rem;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-        }
-        
-        .card {
-            background-color: var(--container-background);
             border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .card-title {
-            font-size: 1.25rem;
-            margin: 0;
-        }
-        
-        /* Control styles */
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -152,30 +327,18 @@
             gap: 10px;
         }
         
-        .control-group {
-            display: flex;
-            gap: 10px;
-        }
-        
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-width: 120px;
-        }
-        
-        .btn-icon {
-            padding: 8px;
-            min-width: auto;
-            border-radius: 6px;
         }
         
         .btn-primary {
@@ -183,10 +346,13 @@
             color: white;
         }
         
-        .btn-primary:hover:not(:disabled) {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
         
         .btn-danger {
@@ -194,44 +360,8 @@
             color: white;
         }
         
-        .btn-danger:hover:not(:disabled) {
-            background-color: #c62b38;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-        
-        .btn-secondary:hover:not(:disabled) {
-            background-color: #332fa8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        .btn-outline:hover:not(:disabled) {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        
-        .btn:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: none;
+        .btn-danger:hover {
+            background-color: #c0392b;
         }
         
         .icon {
@@ -239,139 +369,19 @@
             height: 18px;
         }
         
-        /* Waveform visualization */
-        .waveform-container {
-            height: 100px;
-            width: 100%;
-            background-color: var(--transcript-background);
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid var(--border-color);
-        }
-        
-        .waveform-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        
-        .waveform-placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--text-color);
-            opacity: 0.5;
-            font-size: 0.9rem;
-            text-align: center;
-            width: 100%;
-        }
-        
-        /* Speaker profiles */
         .speaker-profiles {
             margin-bottom: 1.5rem;
         }
         
-        .profile-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        
-        .profile-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        input, select {
-            padding: 10px 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background-color: var(--container-background);
-            color: var(--text-color);
-            transition: border-color 0.2s;
-            flex-grow: 1;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-        }
-        
-        .add-profile {
-            background-color: var(--success-color);
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-        
-        .add-profile:hover {
-            background-color: #27ae60;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .add-profile:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-        
-        /* Status styles */
-        .status {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            background-color: var(--transcript-background);
-            border: 1px solid var(--border-color);
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #adb5bd;
-        }
-        
-        .status-recording .status-indicator {
-            background-color: var(--error-color);
-            animation: pulse 1.5s infinite;
-        }
-        
-        .status-ready .status-indicator {
-            background-color: var(--success-color);
-        }
-        
-        /* Transcript container */
         .transcript-container {
+            margin-top: 2rem;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 6px;
             padding: 1rem;
             min-height: 300px;
-            max-height: 400px;
+            max-height: 60vh;
             overflow-y: auto;
             background-color: var(--transcript-background);
-            margin-bottom: 1.5rem;
         }
         
         .transcript-text {
@@ -381,7 +391,7 @@
         }
         
         .speaker {
-            font-weight: 600;
+            font-weight: bold;
             margin-right: 6px;
         }
         
@@ -397,29 +407,91 @@
             color: var(--accent-color);
         }
         
-        .interim {
-            opacity: 0.7;
+        .status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
         
-        /* Theme switcher */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 8px;
+        }
+        
+        .status-recording .status-indicator {
+            background-color: var(--error-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background-color: var(--container-background);
+            color: var(--text-color);
+        }
+        
+        .add-profile {
+            background-color: var(--success-color);
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .add-profile:hover {
+            background-color: #27ae60;
+        }
+        
+        .export-options {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        /* Theme switcher styles */
         .theme-switcher {
-            margin: 0.5rem 0 1.5rem;
-            padding: 1rem;
+            margin: 0.5rem 0;
+            padding: 0.5rem;
             background-color: var(--container-background);
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border-color);
+            position: relative;
+            transition: all 0.3s ease;
         }
         
         .theme-switcher h3 {
             margin-bottom: 0.5rem;
-            font-size: 1rem;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
         }
         
         .slider-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
         }
         
         .slider-labels {
@@ -430,9 +502,56 @@
         
         .slider-label {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             flex: 1;
             color: var(--text-color);
+        }
+        
+        /* Compact theme switcher */
+        .compact-theme-switcher .theme-switcher {
+            width: 40px;
+            height: 40px;
+            overflow: hidden;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+        }
+        
+        .compact-theme-switcher .theme-switcher::before {
+            content: "⚙️";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .compact-theme-switcher .theme-switcher:hover {
+            width: 200px;
+            height: auto;
+            padding: 10px;
+            background-color: var(--container-background);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .compact-theme-switcher .theme-switcher h3,
+        .compact-theme-switcher .slider-container,
+        .compact-theme-switcher .feature-toggle {
+            display: none;
+        }
+        
+        .compact-theme-switcher .theme-switcher:hover h3,
+        .compact-theme-switcher .theme-switcher:hover .slider-container,
+        .compact-theme-switcher .theme-switcher:hover .feature-toggle {
+            display: block;
+        }
+        
+        .compact-theme-switcher .theme-switcher:hover::before {
+            display: none;
         }
         
         .theme-slider {
@@ -455,23 +574,20 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--primary-color);
+            background: var(--secondary-color);
             cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
         
         .theme-slider::-moz-range-thumb {
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--primary-color);
+            background: var(--secondary-color);
             cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            border: none;
         }
         
-        /* Toggle switch */
+        /* Grammar correction toggle */
         .feature-toggle {
             display: flex;
             align-items: center;
@@ -528,38 +644,31 @@
             transform: translateX(26px);
         }
         
-        /* Export options */
-        .export-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 1.5rem;
+        /* Grammar correction indicator */
+        .grammar-correction {
+            color: var(--success-color);
+            text-decoration: underline;
+            cursor: help;
         }
         
-        /* Recordings list */
+        /* Audio recordings list */
         .recordings-list {
             margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
         }
         
         .recordings-list h3 {
-            color: var(--primary-color);
+            color: var(--secondary-color);
             margin-bottom: 1rem;
         }
         
         .recording-item {
             display: flex;
             align-items: center;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            background-color: var(--container-background);
-            transition: all 0.2s ease;
-        }
-        
-        .recording-item:hover {
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
+            justify-content: space-between;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
         
         .recording-info {
@@ -568,98 +677,21 @@
         
         .recording-actions {
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 5px;
         }
         
-        .recording-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .recording-waveform {
-            height: 40px;
-            flex: 1;
-            background-color: var(--transcript-background);
-            border-radius: 4px;
-            margin: 0 10px;
-            overflow: hidden;
-        }
-        
-        /* Audio player styling */
-        audio {
-            height: 36px;
-            border-radius: 18px;
-            background-color: var(--transcript-background);
-        }
-        
-        /* Compact theme switcher */
-        .compact-theme-switcher .theme-switcher {
-            width: 40px;
-            height: 40px;
-            overflow: hidden;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            border: none;
-        }
-        
-        .compact-theme-switcher .theme-switcher::before {
-            content: "⚙️";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover {
-            width: 200px;
-            height: auto;
-            padding: 1rem;
-            background-color: var(--container-background);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-color);
-        }
-        
-        .compact-theme-switcher .theme-switcher h3,
-        .compact-theme-switcher .slider-container,
-        .compact-theme-switcher .feature-toggle {
-            display: none;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover h3,
-        .compact-theme-switcher .theme-switcher:hover .slider-container,
-        .compact-theme-switcher .theme-switcher:hover .feature-toggle {
-            display: block;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover::before {
-            display: none;
-        }
-        
-        /* Animation */
         @keyframes pulse {
             0% {
                 opacity: 1;
-                transform: scale(1);
             }
             50% {
                 opacity: 0.5;
-                transform: scale(1.1);
             }
             100% {
                 opacity: 1;
-                transform: scale(1);
             }
         }
         
-        /* Responsive styles */
         @media (max-width: 768px) {
             .container {
                 padding: 1.5rem;
@@ -670,35 +702,12 @@
                 align-items: stretch;
             }
             
-            .control-group {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .btn {
-                flex: 1;
-            }
-            
-            .recording-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .recording-actions {
-                width: 100%;
-                margin-top: 1rem;
-            }
-            
-            .recording-controls {
-                width: 100%;
-            }
-            
             .export-options {
-                justify-content: space-between;
+                flex-direction: column;
             }
             
-            .export-options .btn {
-                flex: 1;
+            .waveform-container {
+                height: 80px;
             }
         }
     </style>
@@ -707,138 +716,104 @@
     <div class="container">
         <header>
             <h1>Voice Transcription</h1>
-            <p>Record audio and generate real-time transcription with waveform visualization</p>
+            <p>Click Record to start capturing audio and generating real-time transcription</p>
         </header>
         
         <div class="theme-container compact-theme-switcher">
-            <div class="theme-switcher">
-                <h3>Interface Mode</h3>
-                <div class="slider-container">
-                    <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
-                    <div class="slider-labels">
-                        <span class="slider-label">Light</span>
-                        <span class="slider-label">Blue Light</span>
-                        <span class="slider-label">Notepad</span>
-                        <span class="slider-label">Dark</span>
-                    </div>
+        <div class="theme-switcher">
+            <h3>Interface Mode</h3>
+            <div class="slider-container">
+                <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
+                <div class="slider-labels">
+                    <span class="slider-label">Standard</span>
+                    <span class="slider-label">Blue Light</span>
+                    <span class="slider-label">Notepad</span>
+                    <span class="slider-label">Dark</span>
                 </div>
-                
-                <div class="feature-toggle">
-                    <label for="grammarToggle">Grammar Correction:</label>
-                    <label class="toggle">
-                        <input type="checkbox" id="grammarToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
+            </div>
+            
+            <div class="feature-toggle">
+                <label for="grammarToggle">Grammar Correction:</label>
+                <label class="toggle">
+                    <input type="checkbox" id="grammarToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
             </div>
         </div>
+    </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Recording Controls</h3>
-                <div class="status status-ready">
-                    <div class="status-indicator"></div>
-                    <span class="status-text">Ready to record</span>
-                </div>
-            </div>
-            
-            <div class="waveform-container">
-                <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
-                <div id="waveformPlaceholder" class="waveform-placeholder">Audio waveform will appear here during recording</div>
-            </div>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <button id="recordBtn" class="btn btn-primary">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="6"></circle>
-                        </svg>
-                        Record
-                    </button>
-                    
-                    <button id="pauseBtn" class="btn btn-outline" disabled>
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="6" y="4" width="4" height="16"></rect>
-                            <rect x="14" y="4" width="4" height="16"></rect>
-                        </svg>
-                        Pause
-                    </button>
-                    
-                    <button id="stopBtn" class="btn btn-danger" disabled>
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
-                        </svg>
-                        Stop
-                    </button>
-                </div>
-            </div>
+        <div class="status">
+            <div class="status-indicator"></div>
+            <span class="status-text">Ready to record</span>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Speaker Profiles</h3>
-            </div>
-            
-            <div class="speaker-profiles">
-                <div class="profile-list">
-                    <div class="profile-row">
-                        <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
-                        <select class="profile-voice">
-                            <option value="default">Default Voice Profile</option>
-                        </select>
-                    </div>
+        <!-- Audio Waveform Visualization -->
+        <div class="waveform-container">
+            <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+            <div id="waveformPlaceholder" class="waveform-placeholder">Audio visualization will appear here when recording</div>
+        </div>
+        
+        <div class="speaker-profiles">
+            <h3>Speaker Profiles</h3>
+            <div class="profile-list">
+                <div class="profile-row">
+                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
+                    <select class="profile-voice">
+                        <option value="default">Default Voice Profile</option>
+                    </select>
                 </div>
-                <button class="add-profile" id="addProfile">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    Add Speaker
-                </button>
             </div>
+            <button class="add-profile" id="addProfile">+ Add Speaker</button>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Transcription</h3>
-            </div>
+        <div class="controls">
+            <button id="recordBtn" class="btn btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="6"></circle>
+                </svg>
+                Record
+            </button>
             
-            <div class="transcript-container">
-                <div id="transcript" class="transcript-text"></div>
-            </div>
-            
-            <div class="export-options">
-                <button id="copyBtn" class="btn btn-primary">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
-                    Copy Text
-                </button>
-                <button id="downloadTextBtn" class="btn btn-primary">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Download Text
-                </button>
-                <button id="downloadAudioBtn" class="btn btn-primary">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 18V5l12-2v13"></path>
-                        <circle cx="6" cy="18" r="3"></circle>
-                        <circle cx="18" cy="16" r="3"></circle>
-                    </svg>
-                    Download Audio
-                </button>
-            </div>
+            <button id="stopBtn" class="btn btn-danger" disabled>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+                </svg>
+                Stop
+            </button>
         </div>
         
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Saved Recordings</h3>
-            </div>
-            
+        <div class="transcript-container">
+            <div id="transcript" class="transcript-text"></div>
+        </div>
+        
+        <div class="export-options">
+            <button id="copyBtn" class="btn btn-sm btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                Copy Text
+            </button>
+            <button id="downloadTextBtn" class="btn btn-sm btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Text
+            </button>
+            <button id="downloadAudioBtn" class="btn btn-sm btn-primary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18V5l12-2v13"></path>
+                    <circle cx="6" cy="18" r="3"></circle>
+                    <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+                Download Audio
+            </button>
+        </div>
+        
+        <div class="recordings-list">
+            <h3>Saved Recordings</h3>
             <div id="savedRecordings"></div>
         </div>
     </div>
@@ -847,7 +822,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             // DOM Elements
             const recordBtn = document.getElementById('recordBtn');
-            const pauseBtn = document.getElementById('pauseBtn');
             const stopBtn = document.getElementById('stopBtn');
             const transcript = document.getElementById('transcript');
             const statusText = document.querySelector('.status-text');
@@ -864,19 +838,109 @@
             const waveformPlaceholder = document.getElementById('waveformPlaceholder');
             const waveformCtx = waveformCanvas.getContext('2d');
             
-            // Set canvas resolution
+            // Audio Waveform Variables
+            let audioContext;
+            let analyser;
+            let microphone;
+            let javascriptNode;
+            let dataArray;
+            let animationId;
+            
+            // Set canvas width and height based on its container
             function resizeCanvas() {
                 const container = waveformCanvas.parentElement;
-                waveformCanvas.width = container.clientWidth * window.devicePixelRatio;
-                waveformCanvas.height = container.clientHeight * window.devicePixelRatio;
-                waveformCanvas.style.width = container.clientWidth + 'px';
-                waveformCanvas.style.height = container.clientHeight + 'px';
-                waveformCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                waveformCanvas.width = container.offsetWidth;
+                waveformCanvas.height = container.offsetHeight;
             }
             
-            // Initialize canvas
+            // Call once on load
             resizeCanvas();
+            
+            // And also on window resize
             window.addEventListener('resize', resizeCanvas);
+            
+            // Draw waveform function
+            function drawWaveform() {
+                // Clear the canvas
+                waveformCtx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+                
+                // Get the current waveform data
+                analyser.getByteTimeDomainData(dataArray);
+                
+                // Draw the waveform
+                waveformCtx.lineWidth = 2;
+                waveformCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--waveform-color');
+                waveformCtx.beginPath();
+                
+                const sliceWidth = waveformCanvas.width / dataArray.length;
+                let x = 0;
+                
+                for (let i = 0; i < dataArray.length; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * waveformCanvas.height / 2;
+                    
+                    if (i === 0) {
+                        waveformCtx.moveTo(x, y);
+                    } else {
+                        waveformCtx.lineTo(x, y);
+                    }
+                    
+                    x += sliceWidth;
+                }
+                
+                waveformCtx.lineTo(waveformCanvas.width, waveformCanvas.height / 2);
+                waveformCtx.stroke();
+                
+                // Continue animation loop
+                animationId = requestAnimationFrame(drawWaveform);
+            }
+            
+            // Initialize audio visualization
+            function initAudioVisualization(stream) {
+                // Create audio context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create an analyser node
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                
+                // Get microphone input
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                // Connect microphone to analyser
+                microphone.connect(analyser);
+                
+                // Create a buffer for the waveform data
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
+                // Hide the placeholder
+                waveformPlaceholder.style.display = 'none';
+                
+                // Start drawing
+                drawWaveform();
+            }
+            
+            // Stop audio visualization
+            function stopAudioVisualization() {
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                
+                if (audioContext) {
+                    if (microphone) {
+                        microphone.disconnect();
+                    }
+                    
+                    // Not closing audioContext as it might be reused
+                }
+                
+                // Clear the canvas
+                waveformCtx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+                
+                // Show the placeholder again
+                waveformPlaceholder.style.display = 'flex';
+            }
             
             // Grammar correction dictionary (Simple example)
             const grammarCorrections = {
@@ -897,680 +961,3 @@
                 "sorta": "sort of",
                 "alot": "a lot",
             };
-            
-            // Audio Analyzer and Waveform visualization setup
-            let audioContext;
-            let analyser;
-            let dataArray;
-            let animationId;
-            
-            // Initialize audio analyzer
-            function setupAudioAnalyzer(stream) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-                source.connect(analyser);
-                
-                const bufferLength = analyser.frequencyBinCount;
-                dataArray = new Uint8Array(bufferLength);
-                
-                // Hide placeholder once we have audio data
-                waveformPlaceholder.style.display = 'none';
-                
-                // Start drawing waveform
-                drawWaveform();
-            }
-            
-            // Draw waveform visualization
-            function drawWaveform() {
-                animationId = requestAnimationFrame(drawWaveform);
-                
-                analyser.getByteTimeDomainData(dataArray);
-                
-                const width = waveformCanvas.width / window.devicePixelRatio;
-                const height = waveformCanvas.height / window.devicePixelRatio;
-                
-                waveformCtx.fillStyle = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--transcript-background').trim();
-                waveformCtx.fillRect(0, 0, width, height);
-                
-                waveformCtx.lineWidth = 2;
-                waveformCtx.strokeStyle = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--primary-color').trim();
-                
-                waveformCtx.beginPath();
-                
-                const sliceWidth = width / dataArray.length;
-                let x = 0;
-                
-                for (let i = 0; i < dataArray.length; i++) {
-                    const v = dataArray[i] / 128.0;
-                    const y = v * height / 2;
-                    
-                    if (i === 0) {
-                        waveformCtx.moveTo(x, y);
-                    } else {
-                        waveformCtx.lineTo(x, y);
-                    }
-                    
-                    x += sliceWidth;
-                }
-                
-                waveformCtx.lineTo(width, height / 2);
-                waveformCtx.stroke();
-            }
-            
-            // Stop waveform visualization
-            function stopWaveform() {
-                if (animationId) {
-                    cancelAnimationFrame(animationId);
-                    animationId = null;
-                }
-                
-                if (audioContext) {
-                    audioContext.close().catch(console.error);
-                }
-                
-                // Clear canvas
-                const width = waveformCanvas.width / window.devicePixelRatio;
-                const height = waveformCanvas.height / window.devicePixelRatio;
-                waveformCtx.fillStyle = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--transcript-background').trim();
-                waveformCtx.fillRect(0, 0, width, height);
-                
-                // Show placeholder again
-                waveformPlaceholder.style.display = 'block';
-            }
-            
-            // Create waveform for a recording
-            function createRecordingWaveform(audioBlob, container) {
-                const canvas = document.createElement('canvas');
-                canvas.className = 'waveform-canvas';
-                container.appendChild(canvas);
-                
-                const ctx = canvas.getContext('2d');
-                canvas.width = container.clientWidth * window.devicePixelRatio;
-                canvas.height = container.clientHeight * window.devicePixelRatio;
-                canvas.style.width = container.clientWidth + 'px';
-                canvas.style.height = container.clientHeight + 'px';
-                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-                
-                // Draw placeholder waveform
-                const width = canvas.width / window.devicePixelRatio;
-                const height = canvas.height / window.devicePixelRatio;
-                
-                ctx.fillStyle = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--transcript-background').trim();
-                ctx.fillRect(0, 0, width, height);
-                
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = getComputedStyle(document.documentElement)
-                    .getPropertyValue('--primary-color').trim();
-                
-                // Create audio element to analyze the recording
-                const audio = new Audio(URL.createObjectURL(audioBlob));
-                const tempContext = new (window.AudioContext || window.webkitAudioContext)();
-                const tempAnalyser = tempContext.createAnalyser();
-                tempAnalyser.fftSize = 256;
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    tempContext.decodeAudioData(e.target.result).then(buffer => {
-                        const bufferLength = tempAnalyser.frequencyBinCount;
-                        const dataArray = new Float32Array(bufferLength);
-                        
-                        // Process the audio data
-                        const peaks = [];
-                        const sampleSize = Math.floor(buffer.length / width);
-                        
-                        for (let i = 0; i < width; i++) {
-                            const start = Math.floor(i * sampleSize);
-                            const end = Math.floor(start + sampleSize);
-                            let max = 0;
-                            
-                            for (let j = start; j < end; j++) {
-                                const absValue = Math.abs(buffer.getChannelData(0)[j]);
-                                if (absValue > max) {
-                                    max = absValue;
-                                }
-                            }
-                            
-                            peaks.push(max);
-                        }
-                        
-                        // Draw simplified waveform
-                        ctx.beginPath();
-                        ctx.moveTo(0, height / 2);
-                        
-                        for (let i = 0; i < peaks.length; i++) {
-                            const x = i;
-                            const y = height / 2 * (1 - peaks[i] * 1.5);
-                            ctx.lineTo(x, y);
-                            ctx.lineTo(x, height - y);
-                        }
-                        
-                        ctx.lineTo(width, height / 2);
-                        ctx.stroke();
-                        
-                        tempContext.close();
-                    }).catch(console.error);
-                };
-                
-                reader.readAsArrayBuffer(audioBlob);
-                
-                return canvas;
-            }
-            
-            // Speech Recognition Setup
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
-            
-            // Check if speech recognition is supported
-            if (!window.SpeechRecognition) {
-                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
-                recordBtn.disabled = true;
-                pauseBtn.disabled = true;
-                statusText.textContent = "Speech recognition not supported";
-                return;
-            }
-            
-            const recognition = new window.SpeechRecognition();
-            
-            // Configure speech recognition
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-            recognition.maxAlternatives = 3;
-            
-            // State variables
-            let isRecording = false;
-            let isPaused = false;
-            let currentSpeakerIndex = 0;
-            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
-            let transcriptSegments = [];
-            let audioChunks = [];
-            let mediaRecorder = null;
-            let recordingStream = null;
-            
-            // Initialize speaker voices dropdown
-            function populateVoiceList() {
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                // Add some sample voice profiles
-                const voiceProfiles = [
-                    'Default Voice Profile', 
-                    'Deep Male Voice', 
-                    'High Female Voice',
-                    'Neutral Voice',
-                    'British Accent',
-                    'American Accent'
-                ];
-                
-                voiceSelects.forEach(select => {
-                    // Clear existing options first
-                    while(select.firstChild) {
-                        select.removeChild(select.firstChild);
-                    }
-                    
-                    // Add voice profiles
-                    voiceProfiles.forEach((profile, index) => {
-                        const option = document.createElement('option');
-                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = profile;
-                        select.appendChild(option);
-                    });
-                });
-            }
-            
-            // Add a new speaker profile
-            function addSpeakerProfile() {
-                const newIndex = speakerProfiles.length + 1;
-                const profileRow = document.createElement('div');
-                profileRow.className = 'profile-row';
-                profileRow.innerHTML = `
-                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                    <button class="btn btn-icon btn-danger remove-profile">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                `;
-                
-                profileList.appendChild(profileRow);
-                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
-                
-                // Update the voice options
-                populateVoiceList();
-                
-                // Update event listeners for the new inputs
-                updateProfileEventListeners();
-                
-                // Add remove functionality
-                profileRow.querySelector('.remove-profile').addEventListener('click', function() {
-                    const index = Array.from(profileList.children).indexOf(profileRow);
-                    if (index !== -1) {
-                        profileList.removeChild(profileRow);
-                        speakerProfiles.splice(index, 1);
-                        
-                        // Update speaker index if needed
-                        if (currentSpeakerIndex >= speakerProfiles.length) {
-                            currentSpeakerIndex = Math.max(0, speakerProfiles.length - 1);
-                        }
-                    }
-                });
-            }
-            
-            // Update speaker profiles when inputs change
-            function updateProfileEventListeners() {
-                const nameInputs = document.querySelectorAll('.profile-name');
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                nameInputs.forEach((input, index) => {
-                    input.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].name = input.value;
-                        }
-                    });
-                });
-                
-                voiceSelects.forEach((select, index) => {
-                    select.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].voice = select.value;
-                        }
-                    });
-                });
-            }
-            
-            // Apply grammar correction
-            function correctGrammar(text) {
-                if (!grammarToggle.checked) return text;
-                
-                let correctedText = ' ' + text + ' '; // Add spaces for matching whole words
-                
-                // Apply corrections
-                Object.keys(grammarCorrections).forEach(error => {
-                    const regex = new RegExp(error, 'gi');
-                    correctedText = correctedText.replace(regex, grammarCorrections[error]);
-                });
-                
-                // Basic capitalization for sentences
-                correctedText = correctedText.replace(/(?<=^|[.!?]\s+)[a-z]/g, match => match.toUpperCase());
-                
-                // Remove extra spaces we added
-                correctedText = correctedText.trim();
-                
-                return correctedText;
-            }
-            
-            // Start recording function
-            function startRecording() {
-                try {
-                    // Request microphone permission first
-                    navigator.mediaDevices.getUserMedia({ audio: true })
-                        .then(stream => {
-                            recordingStream = stream;
-                            
-                            // Setup audio analyzer for waveform visualization
-                            setupAudioAnalyzer(stream);
-                            
-                            // Once we have microphone permission, start recognition
-                            try {
-                                recognition.start();
-                                isRecording = true;
-                                isPaused = false;
-                                status.classList.add('status-recording');
-                                status.classList.remove('status-ready');
-                                statusText.textContent = 'Recording...';
-                                recordBtn.disabled = true;
-                                pauseBtn.disabled = false;
-                                stopBtn.disabled = false;
-                                
-                                // Create media recorder for audio recording
-                                mediaRecorder = new MediaRecorder(stream);
-                                mediaRecorder.ondataavailable = (event) => {
-                                    if (event.data.size > 0) {
-                                        audioChunks.push(event.data);
-                                    }
-                                };
-                                
-                                mediaRecorder.start();
-                                
-                                mediaRecorder.onstop = () => {
-                                    // Save audio recording
-                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                                    saveRecording(audioBlob);
-                                    audioChunks = [];
-                                    
-                                    // Stop the stream tracks
-                                    if (recordingStream) {
-                                        recordingStream.getTracks().forEach(track => track.stop());
-                                        recordingStream = null;
-                                    }
-                                };
-                            } catch (recognitionError) {
-                                console.error('Error starting recognition:', recognitionError);
-                                statusText.textContent = 'Error starting recognition';
-                            }
-                        })
-                        .catch(micError => {
-                            console.error('Microphone permission denied:', micError);
-                            statusText.textContent = 'Microphone permission denied';
-                            alert("You need to allow microphone access to use the voice transcription feature.");
-                        });
-                } catch (error) {
-                    console.error('Error requesting microphone:', error);
-                    statusText.textContent = 'Error requesting microphone';
-                }
-            }
-            
-            // Pause recording function
-            function pauseRecording() {
-                if (isRecording && !isPaused) {
-                    recognition.stop();
-                    mediaRecorder.pause();
-                    stopWaveform();
-                    
-                    isPaused = true;
-                    pauseBtn.innerHTML = `
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                        Resume
-                    `;
-                    status.classList.remove('status-recording');
-                    statusText.textContent = 'Paused';
-                } else if (isRecording && isPaused) {
-                    // Resume recording
-                    recognition.start();
-                    mediaRecorder.resume();
-                    
-                    // Resume waveform
-                    setupAudioAnalyzer(recordingStream);
-                    
-                    isPaused = false;
-                    pauseBtn.innerHTML = `
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="6" y="4" width="4" height="16"></rect>
-                            <rect x="14" y="4" width="4" height="16"></rect>
-                        </svg>
-                        Pause
-                    `;
-                    status.classList.add('status-recording');
-                    statusText.textContent = 'Recording...';
-                }
-            }
-            
-            // Stop recording function
-            function stopRecording() {
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                }
-                
-                recognition.stop();
-                isRecording = false;
-                isPaused = false;
-                status.classList.remove('status-recording');
-                status.classList.add('status-ready');
-                statusText.textContent = 'Ready to record';
-                recordBtn.disabled = false;
-                pauseBtn.disabled = true;
-                stopBtn.disabled = true;
-                
-                // Reset pause button
-                pauseBtn.innerHTML = `
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="6" y="4" width="4" height="16"></rect>
-                        <rect x="14" y="4" width="4" height="16"></rect>
-                    </svg>
-                    Pause
-                `;
-                
-                // Stop waveform animation
-                stopWaveform();
-            }
-            
-            // Save recording to IndexedDB and display in recordings list
-            function saveRecording(audioBlob) {
-                const recordingId = 'recording_' + Date.now();
-                const recordingName = `Recording ${new Date().toLocaleString()}`;
-                const audioUrl = URL.createObjectURL(audioBlob);
-                
-                // Create recording item container
-                const recordingItem = document.createElement('div');
-                recordingItem.className = 'recording-item';
-                
-                // Create recording info section
-                const recordingInfo = document.createElement('div');
-                recordingInfo.className = 'recording-info';
-                recordingInfo.innerHTML = `<p>${recordingName}</p>`;
-                
-                // Create waveform container
-                const waveformContainer = document.createElement('div');
-                waveformContainer.className = 'recording-waveform';
-                
-                // Create recording controls
-                const recordingControls = document.createElement('div');
-                recordingControls.className = 'recording-controls';
-                
-                // Create audio element
-                const audio = document.createElement('audio');
-                audio.src = audioUrl;
-                audio.controls = true;
-                
-                // Create action buttons
-                const actionButtons = document.createElement('div');
-                actionButtons.className = 'recording-actions';
-                actionButtons.innerHTML = `
-                    <button class="btn btn-icon btn-outline download-recording" data-id="${recordingId}" title="Download Recording">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                    </button>
-                    <button class="btn btn-icon btn-danger delete-recording" data-id="${recordingId}" title="Delete Recording">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
-                    </button>
-                `;
-                
-                // Assemble the recording item
-                recordingControls.appendChild(audio);
-                recordingControls.appendChild(actionButtons);
-                
-                recordingItem.appendChild(recordingInfo);
-                recordingItem.appendChild(waveformContainer);
-                recordingItem.appendChild(recordingControls);
-                
-                savedRecordings.appendChild(recordingItem);
-                
-                // Create waveform visualization for the recording
-                createRecordingWaveform(audioBlob, waveformContainer);
-                
-                // Save to IndexedDB
-                saveToIndexedDB(recordingId, audioBlob, recordingName);
-                
-                // Add event listeners for buttons
-                recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = audioUrl;
-                    a.download = `${recordingName}.mp3`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-                
-                recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                    if (confirm('Are you sure you want to delete this recording?')) {
-                        deleteRecording(recordingId);
-                        recordingItem.remove();
-                    }
-                });
-            }
-            
-            // IndexedDB setup for saving recordings
-            let db;
-            const request = indexedDB.open('RecordingsDB', 1);
-            
-            request.onerror = (event) => {
-                console.error('Error opening IndexedDB:', event.target.error);
-            };
-            
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains('recordings')) {
-                    db.createObjectStore('recordings', { keyPath: 'id' });
-                }
-            };
-            
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadSavedRecordings();
-            };
-            
-            // Save recording to IndexedDB
-            function saveToIndexedDB(id, blob, name) {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readwrite');
-                const store = transaction.objectStore('recordings');
-                const recording = {
-                    id: id,
-                    blob: blob,
-                    name: name,
-                    date: new Date().toISOString(),
-                    transcript: transcript.innerHTML // Save transcript with recording
-                };
-                
-                store.add(recording);
-            }
-            
-            // Delete recording from IndexedDB
-            function deleteRecording(id) {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readwrite');
-                const store = transaction.objectStore('recordings');
-                store.delete(id);
-            }
-            
-            // Load saved recordings from IndexedDB
-            function loadSavedRecordings() {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readonly');
-                const store = transaction.objectStore('recordings');
-                const request = store.getAll();
-                
-                request.onsuccess = (event) => {
-                    const recordings = event.target.result;
-                    if (recordings.length === 0) {
-                        savedRecordings.innerHTML = '<p class="text-muted">No saved recordings yet</p>';
-                        return;
-                    }
-                    
-                    savedRecordings.innerHTML = '';
-                    recordings.forEach(recording => {
-                        const audioUrl = URL.createObjectURL(recording.blob);
-                        
-                        // Create recording item
-                        const recordingItem = document.createElement('div');
-                        recordingItem.className = 'recording-item';
-                        
-                        // Create recording info section
-                        const recordingInfo = document.createElement('div');
-                        recordingInfo.className = 'recording-info';
-                        recordingInfo.innerHTML = `<p>${recording.name}</p>`;
-                        
-                        // Create waveform container
-                        const waveformContainer = document.createElement('div');
-                        waveformContainer.className = 'recording-waveform';
-                        
-                        // Create recording controls
-                        const recordingControls = document.createElement('div');
-                        recordingControls.className = 'recording-controls';
-                        
-                        // Create audio element
-                        const audio = document.createElement('audio');
-                        audio.src = audioUrl;
-                        audio.controls = true;
-                        
-                        // Create action buttons
-                        const actionButtons = document.createElement('div');
-                        actionButtons.className = 'recording-actions';
-                        actionButtons.innerHTML = `
-                            <button class="btn btn-icon btn-outline download-recording" data-id="${recording.id}" title="Download Recording">
-                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                            </button>
-                            <button class="btn btn-icon btn-outline load-transcript" data-id="${recording.id}" title="Load Transcript">
-                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
-                            </button>
-                            <button class="btn btn-icon btn-danger delete-recording" data-id="${recording.id}" title="Delete Recording">
-                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                            </button>
-                        `;
-                        
-                        // Assemble the recording item
-                        recordingControls.appendChild(audio);
-                        recordingControls.appendChild(actionButtons);
-                        
-                        recordingItem.appendChild(recordingInfo);
-                        recordingItem.appendChild(waveformContainer);
-                        recordingItem.appendChild(recordingControls);
-                        
-                        savedRecordings.appendChild(recordingItem);
-                        
-                        // Create waveform visualization for the recording
-                        createRecordingWaveform(recording.blob, waveformContainer);
-                        
-                        // Add event listeners for buttons
-                        recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                            const a = document.createElement('a');
-                            a.href = audioUrl;
-                            a.download = `${recording.name}.mp3`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        });
-                        
-                        recordingItem.querySelector('.load-transcript').addEventListener('click', () => {
-                            if (recording.transcript) {
-                                transcript.innerHTML = recording.transcript;
-                                
-                                // Smooth scroll to transcript
-                                document.querySelector('.transcript-container').scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'start'
-                                });
-                            }
-                        });
-                        
-                        recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                            if (confirm('Are you sure you want to delete this recording?')) {
-                                deleteRecording(recording.id);
-                                recordingItem.remove();
-                            }
-                        });
-                    });
-                };
-            }
