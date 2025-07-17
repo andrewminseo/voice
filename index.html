@@ -3,1379 +3,578 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Caption</title>
+    <title>Voice Transcription</title>
     <style>
-        :root {
-            /* Default theme (Light) */
-            --primary-color: #4a6fa5;
-            --secondary-color: #166088;
-            --light-color: #f0f5f9;
-            --dark-color: #1e2022;
-            --accent-color: #47b8e0;
-            --error-color: #e74c3c;
-            --success-color: #2ecc71;
-            --background-color: #f0f5f9;
-            --container-background: white;
-            --text-color: #1e2022;
-            --border-color: #ddd;
-            --transcript-background: #fafafa;
-        }
-        
-        /* Dark theme */
-        .dark-theme {
-            --primary-color: #6c90c0;
-            --secondary-color: #3d8bb3;
-            --light-color: #2c3e50;
-            --dark-color: #ecf0f1;
-            --accent-color: #5dade2;
-            --background-color: #1a1a1a;
-            --container-background: #2c3e50;
-            --text-color: #ecf0f1;
-            --border-color: #34495e;
-            --transcript-background: #34495e;
-        }
-        
-        /* Blue light filter theme */
-        .blue-light-theme {
-            --primary-color: #a97142;
-            --secondary-color: #88542f;
-            --light-color: #fff1e0;
-            --dark-color: #3d2c20;
-            --accent-color: #c99a6e;
-            --background-color: #fff1e0;
-            --container-background: #fff8ee;
-            --text-color: #3d2c20;
-            --border-color: #d9c6b0;
-            --transcript-background: #ffeddb;
-            filter: sepia(30%) brightness(95%);
-        }
-        
-        /* Discrete theme - Notepad style */
-        .discrete-theme {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --accent-color: #6c757d;
-            --background-color: #f8f9fa;
-            --container-background: #ffffff;
-            --text-color: #343a40;
-            --border-color: #dee2e6;
-            --transcript-background: #ffffff;
-            --notepad-line-color: #e9ecef;
-        }
-        
-        /* Discrete theme UI transformations */
-        .discrete-theme .container {
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-            border-radius: 0;
-            background-image: linear-gradient(#ffffff 29px, var(--notepad-line-color) 1px);
-            background-size: 100% 30px;
-        }
-        
-        .discrete-theme header h1 {
-            font-family: 'Courier New', monospace;
-            color: #000;
-            text-align: left;
-            font-size: 1.5rem;
-            border-bottom: 2px solid #000;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .discrete-theme header p {
-            display: none; /* Hide the recording instruction */
-        }
-        
-        .discrete-theme .theme-switcher {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 30px;
-            height: 30px;
-            overflow: hidden;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            transition: width 0.3s, height 0.3s;
-            z-index: 100;
-        }
-        
-        .discrete-theme .theme-switcher:hover {
-            width: 200px;
-            height: auto;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-        }
-        
-        .discrete-theme .theme-switcher h3 {
-            font-size: 0;
-            margin: 0;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .discrete-theme .theme-switcher:hover h3 {
-            font-size: 1rem;
-            opacity: 1;
-            margin-bottom: 10px;
-        }
-        
-        .discrete-theme .slider-labels {
-            display: none;
-        }
-        
-        .discrete-theme .theme-switcher:hover .slider-labels {
-            display: flex;
-        }
-        
-        .discrete-theme .theme-switcher::before {
-            content: "⚙️";
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .discrete-theme .theme-switcher:hover::before {
-            display: none;
-        }
-        
-        .discrete-theme .controls {
-            justify-content: flex-start;
-            border-top: 1px solid var(--border-color);
-            padding-top: 10px;
-            gap: 5px;
-        }
-        
-        .discrete-theme .btn {
-            border-radius: 0;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            background-color: #f8f9fa;
-            color: #343a40;
-            border: 1px solid #ced4da;
-        }
-        
-        .discrete-theme .btn:hover {
-            background-color: #e9ecef;
-        }
-        
-        .discrete-theme .btn-danger {
-            background-color: #f8f9fa;
-            color: #343a40;
-        }
-        
-        .discrete-theme .btn-danger:hover {
-            background-color: #e9ecef;
-            color: #343a40;
-        }
-        
-        .discrete-theme .status {
-            display: none;
-        }
-        
-        .discrete-theme .speaker-profiles {
-            display: none;
-        }
-        
-        .discrete-theme .transcript-container {
-            border: none;
-            background: transparent;
-            padding: 0;
-            min-height: 200px;
-            margin-top: 5px;
-        }
-        
-        .discrete-theme .transcript-text {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .discrete-theme .export-options {
-            position: absolute;
-            top: 10px;
-            right: 50px;
-            margin: 0;
-            display: flex;
-            gap: 5px;
-        }
-        
-        .discrete-theme .export-options .btn {
-            padding: 2px 5px;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-        }
-        
-        .discrete-theme .export-options .icon {
-            width: 12px;
-            height: 12px;
-        }
-        
-        .discrete-theme .recordings-list {
-            border-top: 1px solid var(--border-color);
-            margin-top: 1rem;
-        }
-        
-        .discrete-theme .recordings-list h3 {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
-        
-        .discrete-theme #recordBtn svg,
-        .discrete-theme #stopBtn svg {
-            display: none;
-        }
-        
-        .discrete-theme #recordBtn::before {
-            content: "📝 Note";
-        }
-        
-        .discrete-theme #stopBtn::before {
-            content: "✓ Done";
-        }
-        
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            transition: background-color 0.3s, color 0.3s;
+            box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        h1 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-        }
-        
+
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            background-color: var(--container-background);
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
         }
-        
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
         .controls {
             display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 10px;
         }
-        
+
         .btn {
-            padding: 12px 24px;
-            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 16px 32px;
+            color: white;
             font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             display: flex;
             align-items: center;
+            gap: 12px;
+            min-width: 140px;
             justify-content: center;
-            gap: 8px;
         }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
-        
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
+
+        .btn:active {
+            transform: translateY(0);
         }
-        
-        .btn-primary:disabled {
-            background-color: #ccc;
+
+        .btn.recording {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
-        
-        .btn-danger {
-            background-color: var(--error-color);
-            color: white;
+
+        .btn:disabled:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: none;
         }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .icon {
-            width: 18px;
-            height: 18px;
-        }
-        
-        .speaker-profiles {
-            margin-bottom: 1.5rem;
-        }
-        
-        .transcript-container {
-            margin-top: 2rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem;
-            min-height: 300px;
-            max-height: 60vh;
-            overflow-y: auto;
-            background-color: var(--transcript-background);
-        }
-        
-        .transcript-text {
-            white-space: pre-wrap;
-            line-height: 1.7;
-            color: var(--text-color);
-        }
-        
-        .speaker {
-            font-weight: bold;
-            margin-right: 6px;
-        }
-        
-        .speaker-1 {
-            color: var(--primary-color);
-        }
-        
-        .speaker-2 {
-            color: var(--secondary-color);
-        }
-        
-        .speaker-3 {
-            color: var(--accent-color);
-        }
-        
+
         .status {
+            text-align: center;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
+            gap: 12px;
         }
-        
+
         .status-indicator {
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background-color: #ccc;
-            margin-right: 8px;
-        }
-        
-        .status-recording .status-indicator {
-            background-color: var(--error-color);
-            animation: pulse 1.5s infinite;
-        }
-        
-        .profile-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input, select {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            background-color: var(--container-background);
-            color: var(--text-color);
-        }
-        
-        .add-profile {
-            background-color: var(--success-color);
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .add-profile:hover {
-            background-color: #27ae60;
-        }
-        
-        .export-options {
-            margin-top: 1.5rem;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-        
-        /* Theme switcher styles */
-        .theme-switcher {
-            margin: 0.5rem 0;
-            padding: 0.5rem;
-            background-color: var(--container-background);
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            position: relative;
+            background: rgba(255, 255, 255, 0.6);
             transition: all 0.3s ease;
         }
-        
-        .theme-switcher h3 {
-            margin-bottom: 0.5rem;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
+
+        .status.recording .status-indicator {
+            background: #ff6b6b;
+            animation: pulse 1.5s infinite;
         }
-        
-        .slider-container {
+
+        .transcript-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            margin-bottom: 30px;
+        }
+
+        .transcript-text {
+            color: white;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            white-space: pre-wrap;
+        }
+
+        .speaker {
+            font-weight: 700;
+            margin-right: 8px;
+            opacity: 0.9;
+        }
+
+        .speaker-1 { color: #64b5f6; }
+        .speaker-2 { color: #81c784; }
+        .speaker-3 { color: #ffb74d; }
+
+        .interim {
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .export-controls {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
-        
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            min-width: auto;
         }
-        
-        .slider-label {
-            text-align: center;
-            font-size: 0.7rem;
-            flex: 1;
-            color: var(--text-color);
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2.5;
         }
-        
-        /* Compact theme switcher */
-        .compact-theme-switcher .theme-switcher {
+
+        .theme-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .theme-btn {
             width: 40px;
             height: 40px;
-            overflow: hidden;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-        }
-        
-        .compact-theme-switcher .theme-switcher::before {
-            content: "⚙️";
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover {
-            width: 200px;
-            height: auto;
-            padding: 10px;
-            background-color: var(--container-background);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        
-        .compact-theme-switcher .theme-switcher h3,
-        .compact-theme-switcher .slider-container,
-        .compact-theme-switcher .feature-toggle {
-            display: none;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover h3,
-        .compact-theme-switcher .theme-switcher:hover .slider-container,
-        .compact-theme-switcher .theme-switcher:hover .feature-toggle {
-            display: block;
-        }
-        
-        .compact-theme-switcher .theme-switcher:hover::before {
-            display: none;
-        }
-        
-        .theme-slider {
-            width: 100%;
-            height: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: linear-gradient(to right, 
-                var(--light-color) 0%, 
-                var(--accent-color) 33%, 
-                var(--primary-color) 66%, 
-                var(--dark-color) 100%);
-            outline: none;
-            border-radius: 10px;
-        }
-        
-        .theme-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            cursor: pointer;
-        }
-        
-        .theme-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--secondary-color);
-            cursor: pointer;
+            border-radius: 8px;
             border: none;
-        }
-        
-        /* Grammar correction toggle */
-        .feature-toggle {
-            display: flex;
-            align-items: center;
-            margin-top: 1rem;
-        }
-        
-        .feature-toggle label {
-            margin-right: 10px;
             cursor: pointer;
+            margin: 2px;
+            transition: all 0.3s ease;
         }
-        
-        .toggle {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
+
+        .theme-btn.standard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .theme-btn.ocean { background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%); }
+        .theme-btn.sunset { background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); }
+        .theme-btn.forest { background: linear-gradient(135deg, #134e5e 0%, #71b280 100%); }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
         }
-        
-        .toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+
+        .theme-btn.active {
+            box-shadow: 0 0 0 2px white;
         }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 24px;
+
+        .speaker-profiles {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
+
+        .speaker-profiles h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
         }
-        
-        input:checked + .toggle-slider {
-            background-color: var(--success-color);
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-        
-        /* Grammar correction indicator */
-        .grammar-correction {
-            color: var(--success-color);
-            text-decoration: underline;
-            cursor: help;
-        }
-        
-        /* Audio recordings list */
-        .recordings-list {
-            margin-top: 2rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-        
-        .recordings-list h3 {
-            color: var(--secondary-color);
-            margin-bottom: 1rem;
-        }
-        
-        .recording-item {
+
+        .speaker-row {
             display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
             align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
         }
-        
-        .recording-info {
+
+        .speaker-input {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 1rem;
             flex: 1;
         }
-        
-        .recording-actions {
-            display: flex;
-            gap: 5px;
+
+        .speaker-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
-        
+
+        .add-speaker-btn {
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            border-radius: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .add-speaker-btn:hover {
+            background: rgba(76, 175, 80, 0.5);
+        }
+
         @keyframes pulse {
-            0% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-            100% {
-                opacity: 1;
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
         }
-        
+
         @media (max-width: 768px) {
             .container {
-                padding: 1.5rem;
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
             }
             
             .controls {
                 flex-direction: column;
-                align-items: stretch;
+                align-items: center;
             }
             
-            .export-options {
-                flex-direction: column;
+            .btn {
+                width: 100%;
+                max-width: 300px;
             }
+        }
+
+        .theme-ocean {
+            background: linear-gradient(135deg, #2196F3 0%, #21CBF3 100%);
+        }
+
+        .theme-sunset {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+
+        .theme-forest {
+            background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
         }
     </style>
 </head>
 <body>
+    <div class="theme-selector">
+        <button class="theme-btn standard active" data-theme="standard"></button>
+        <button class="theme-btn ocean" data-theme="ocean"></button>
+        <button class="theme-btn sunset" data-theme="sunset"></button>
+        <button class="theme-btn forest" data-theme="forest"></button>
+    </div>
+
     <div class="container">
-        <header>
+        <header class="header">
             <h1>Voice Transcription</h1>
-            <p>Click Record to start capturing audio and generating real-time transcription</p>
+            <p>Advanced speech-to-text with real-time processing</p>
         </header>
-        
-        <div class="theme-container compact-theme-switcher">
-        <div class="theme-switcher">
-            <h3>Interface Mode</h3>
-            <div class="slider-container">
-                <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
-                <div class="slider-labels">
-                    <span class="slider-label">Standard</span>
-                    <span class="slider-label">Blue Light</span>
-                    <span class="slider-label">Notepad</span>
-                    <span class="slider-label">Dark</span>
+
+        <div class="speaker-profiles">
+            <h3>Speaker Profiles</h3>
+            <div class="speaker-list">
+                <div class="speaker-row">
+                    <input type="text" class="speaker-input" placeholder="Speaker 1" value="Speaker 1">
                 </div>
             </div>
-            
-            <div class="feature-toggle">
-                <label for="grammarToggle">Grammar Correction:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="grammarToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
+            <button class="add-speaker-btn" id="addSpeaker">+ Add Speaker</button>
         </div>
-    </div>
-        
+
         <div class="status">
             <div class="status-indicator"></div>
             <span class="status-text">Ready to record</span>
         </div>
-        
-        <div class="speaker-profiles">
-            <h3>Speaker Profiles</h3>
-            <div class="profile-list">
-                <div class="profile-row">
-                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                </div>
-            </div>
-            <button class="add-profile" id="addProfile">+ Add Speaker</button>
-        </div>
-        
+
         <div class="controls">
-            <button id="recordBtn" class="btn btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button id="recordBtn" class="btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <circle cx="12" cy="12" r="6"></circle>
                 </svg>
-                Record
+                Start Recording
             </button>
             
-            <button id="stopBtn" class="btn btn-danger" disabled>
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="6" width="12" height="12" rx="2" ry="2"></rect>
+            <button id="stopBtn" class="btn" disabled>
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="6" y="6" width="12" height="12" rx="2"></rect>
                 </svg>
-                Stop
+                Stop Recording
             </button>
         </div>
-        
+
         <div class="transcript-container">
-            <div id="transcript" class="transcript-text"></div>
+            <div id="transcript" class="transcript-text">Transcript will appear here...</div>
         </div>
-        
-        <div class="export-options">
-            <button id="copyBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+
+        <div class="export-controls">
+            <button id="copyBtn" class="btn btn-secondary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                 </svg>
                 Copy Text
             </button>
-            <button id="downloadTextBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            
+            <button id="downloadBtn" class="btn btn-secondary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download Text
+                Download
             </button>
-            <button id="downloadAudioBtn" class="btn btn-sm btn-primary">
-                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 18V5l12-2v13"></path>
-                    <circle cx="6" cy="18" r="3"></circle>
-                    <circle cx="18" cy="16" r="3"></circle>
+            
+            <button id="clearBtn" class="btn btn-secondary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
                 </svg>
-                Download Audio
+                Clear
             </button>
-        </div>
-        
-        <div class="recordings-list">
-            <h3>Saved Recordings</h3>
-            <div id="savedRecordings"></div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // DOM Elements
             const recordBtn = document.getElementById('recordBtn');
             const stopBtn = document.getElementById('stopBtn');
             const transcript = document.getElementById('transcript');
             const statusText = document.querySelector('.status-text');
             const status = document.querySelector('.status');
             const copyBtn = document.getElementById('copyBtn');
-            const downloadTextBtn = document.getElementById('downloadTextBtn');
-            const downloadAudioBtn = document.getElementById('downloadAudioBtn');
-            const addProfileBtn = document.getElementById('addProfile');
-            const profileList = document.querySelector('.profile-list');
-            const themeSlider = document.getElementById('themeSlider');
-            const grammarToggle = document.getElementById('grammarToggle');
-            const savedRecordings = document.getElementById('savedRecordings');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const addSpeakerBtn = document.getElementById('addSpeaker');
+            const speakerList = document.querySelector('.speaker-list');
+            const themeButtons = document.querySelectorAll('.theme-btn');
+
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             
-            // Grammar correction dictionary (Simple example)
-            const grammarCorrections = {
-                "i ": "I ",
-                "i'm": "I'm",
-                "dont": "don't",
-                "cant": "can't",
-                "wont": "won't",
-                "im ": "I'm ",
-                "ive": "I've",
-                "youre": "you're",
-                "theyre": "they're",
-                "thier": "their",
-                " i ": " I ",
-                "gonna": "going to",
-                "wanna": "want to",
-                "kinda": "kind of",
-                "sorta": "sort of",
-                "alot": "a lot",
-            };
-            
-            // Speech Recognition Setup
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition;
-            
-            // Check if speech recognition is supported
             if (!window.SpeechRecognition) {
-                alert("Speech recognition is not supported in your browser. Please try Chrome, Edge, or Safari.");
-                recordBtn.disabled = true;
                 statusText.textContent = "Speech recognition not supported";
+                recordBtn.disabled = true;
                 return;
             }
-            
+
             const recognition = new window.SpeechRecognition();
-            
-            // Configure speech recognition
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = 'en-US';
-            recognition.maxAlternatives = 3;
-            
-            // State variables
+
             let isRecording = false;
             let currentSpeakerIndex = 0;
-            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
+            let speakers = ['Speaker 1'];
             let transcriptSegments = [];
-            let audioChunks = [];
-            let mediaRecorder = null;
-            
-            // Initialize speaker voices dropdown
-            function populateVoiceList() {
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                // Add some sample voice profiles
-                const voiceProfiles = [
-                    'Default Voice Profile', 
-                    'Deep Male Voice', 
-                    'High Female Voice',
-                    'Neutral Voice',
-                    'British Accent',
-                    'American Accent'
-                ];
-                
-                voiceSelects.forEach(select => {
-                    // Clear existing options first
-                    while(select.firstChild) {
-                        select.removeChild(select.firstChild);
-                    }
+
+            recordBtn.addEventListener('click', startRecording);
+            stopBtn.addEventListener('click', stopRecording);
+            copyBtn.addEventListener('click', copyTranscript);
+            downloadBtn.addEventListener('click', downloadTranscript);
+            clearBtn.addEventListener('click', clearTranscript);
+            addSpeakerBtn.addEventListener('click', addSpeaker);
+
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
                     
-                    // Add voice profiles
-                    voiceProfiles.forEach((profile, index) => {
-                        const option = document.createElement('option');
-                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = profile;
-                        select.appendChild(option);
-                    });
+                    document.body.className = '';
+                    if (e.target.dataset.theme !== 'standard') {
+                        document.body.classList.add(`theme-${e.target.dataset.theme}`);
+                    }
                 });
-            }
-            
-            // Add a new speaker profile
-            function addSpeakerProfile() {
-                const newIndex = speakerProfiles.length + 1;
-                const profileRow = document.createElement('div');
-                profileRow.className = 'profile-row';
-                profileRow.innerHTML = `
-                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                `;
-                
-                profileList.appendChild(profileRow);
-                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
-                
-                // Update the voice options
-                populateVoiceList();
-                
-                // Update event listeners for the new inputs
-                updateProfileEventListeners();
-            }
-            
-            // Update speaker profiles when inputs change
-            function updateProfileEventListeners() {
-                const nameInputs = document.querySelectorAll('.profile-name');
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                nameInputs.forEach((input, index) => {
-                    input.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].name = input.value;
-                        }
-                    });
-                });
-                
-                voiceSelects.forEach((select, index) => {
-                    select.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].voice = select.value;
-                        }
-                    });
-                });
-            }
-            
-            // Apply grammar correction
-            function correctGrammar(text) {
-                if (!grammarToggle.checked) return text;
-                
-                let correctedText = ' ' + text + ' '; // Add spaces for matching whole words
-                
-                // Apply corrections
-                Object.keys(grammarCorrections).forEach(error => {
-                    const regex = new RegExp(error, 'gi');
-                    correctedText = correctedText.replace(regex, grammarCorrections[error]);
-                });
-                
-                // Basic capitalization for sentences
-                correctedText = correctedText.replace(/(?<=^|[.!?]\s+)[a-z]/g, match => match.toUpperCase());
-                
-                // Remove extra spaces we added
-                correctedText = correctedText.trim();
-                
-                return correctedText;
-            }
-            
-            // Start recording function
+            });
+
             function startRecording() {
-                try {
-                    // Request microphone permission first
-                    navigator.mediaDevices.getUserMedia({ audio: true })
-                        .then(stream => {
-                            // Once we have microphone permission, start recognition
-                            try {
-                                recognition.start();
-                                isRecording = true;
-                                status.classList.add('status-recording');
-                                statusText.textContent = 'Recording...';
-                                recordBtn.disabled = true;
-                                stopBtn.disabled = false;
-                                
-                                // Create media recorder for audio recording
-                                mediaRecorder = new MediaRecorder(stream);
-                                mediaRecorder.ondataavailable = (event) => {
-                                    if (event.data.size > 0) {
-                                        audioChunks.push(event.data);
-                                    }
-                                };
-                                
-                                mediaRecorder.start();
-                                
-                                mediaRecorder.onstop = () => {
-                                    // Save audio recording
-                                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                                    saveRecording(audioBlob);
-                                    audioChunks = [];
-                                };
-                            } catch (recognitionError) {
-                                console.error('Error starting recognition:', recognitionError);
-                                statusText.textContent = 'Error starting recognition';
-                            }
-                        })
-                        .catch(micError => {
-                            console.error('Microphone permission denied:', micError);
-                            statusText.textContent = 'Microphone permission denied';
-                            alert("You need to allow microphone access to use the voice transcription feature.");
-                        });
-                } catch (error) {
-                    console.error('Error requesting microphone:', error);
-                    statusText.textContent = 'Error requesting microphone';
-                }
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(() => {
+                        recognition.start();
+                        isRecording = true;
+                        status.classList.add('recording');
+                        statusText.textContent = 'Recording...';
+                        recordBtn.disabled = true;
+                        recordBtn.classList.add('recording');
+                        stopBtn.disabled = false;
+                    })
+                    .catch(() => {
+                        statusText.textContent = 'Microphone access denied';
+                    });
             }
-            
-            // Stop recording function
+
             function stopRecording() {
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    mediaRecorder.stop();
-                }
-                
                 recognition.stop();
                 isRecording = false;
-                status.classList.remove('status-recording');
+                status.classList.remove('recording');
                 statusText.textContent = 'Recording stopped';
                 recordBtn.disabled = false;
+                recordBtn.classList.remove('recording');
                 stopBtn.disabled = true;
             }
-            
-            // Save recording to cookies and display in recordings list
-            function saveRecording(audioBlob) {
-                const recordingId = 'recording_' + Date.now();
-                const recordingName = `Recording ${new Date().toLocaleString()}`;
-                const audioUrl = URL.createObjectURL(audioBlob);
-                
-                // Create HTML for recording
-                const recordingItem = document.createElement('div');
-                recordingItem.className = 'recording-item';
-                recordingItem.innerHTML = `
-                    <div class="recording-info">
-                        <p>${recordingName}</p>
-                    </div>
-                    <div class="recording-actions">
-                        <audio src="${audioUrl}" controls></audio>
-                        <button class="btn-sm btn-primary download-recording" data-id="${recordingId}">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
-                        <button class="btn-sm btn-danger delete-recording" data-id="${recordingId}">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </div>
+
+            function addSpeaker() {
+                const speakerIndex = speakers.length + 1;
+                const speakerName = `Speaker ${speakerIndex}`;
+                speakers.push(speakerName);
+
+                const speakerRow = document.createElement('div');
+                speakerRow.className = 'speaker-row';
+                speakerRow.innerHTML = `
+                    <input type="text" class="speaker-input" placeholder="${speakerName}" value="${speakerName}">
                 `;
-                
-                savedRecordings.appendChild(recordingItem);
-                
-                // Save to IndexedDB (more reliable than cookies for binary data)
-                saveToIndexedDB(recordingId, audioBlob, recordingName);
-                
-                // Add event listener for download button
-                recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                    const a = document.createElement('a');
-                    a.href = audioUrl;
-                    a.download = `${recordingName}.mp3`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                });
-                
-                // Add event listener for delete button
-                recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                    if (confirm('Are you sure you want to delete this recording?')) {
-                        deleteRecording(recordingId);
-                        recordingItem.remove();
-                    }
+                speakerList.appendChild(speakerRow);
+
+                const input = speakerRow.querySelector('.speaker-input');
+                input.addEventListener('input', (e) => {
+                    const index = Array.from(speakerList.children).indexOf(speakerRow);
+                    speakers[index] = e.target.value;
                 });
             }
-            
-            // IndexedDB setup for saving recordings
-            let db;
-            const request = indexedDB.open('RecordingsDB', 1);
-            
-            request.onerror = (event) => {
-                console.error('Error opening IndexedDB:', event.target.error);
-            };
-            
-            request.onupgradeneeded = (event) => {
-                db = event.target.result;
-                if (!db.objectStoreNames.contains('recordings')) {
-                    db.createObjectStore('recordings', { keyPath: 'id' });
+
+            function copyTranscript() {
+                const text = transcriptSegments.map(seg => `${seg.speaker}: ${seg.text}`).join('\n');
+                navigator.clipboard.writeText(text).then(() => {
+                    statusText.textContent = 'Copied to clipboard';
+                    setTimeout(() => {
+                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                    }, 2000);
+                });
+            }
+
+            function downloadTranscript() {
+                const text = transcriptSegments.map(seg => `${seg.speaker}: ${seg.text}`).join('\n');
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function clearTranscript() {
+                transcriptSegments = [];
+                transcript.textContent = 'Transcript will appear here...';
+            }
+
+            function updateTranscriptDisplay(interimText = '') {
+                let html = '';
+                
+                transcriptSegments.forEach((segment, index) => {
+                    const speakerClass = `speaker-${(index % 3) + 1}`;
+                    html += `<p><span class="speaker ${speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
+                });
+
+                if (interimText) {
+                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
+                    const currentSpeaker = speakers[currentSpeakerIndex] || 'Speaker 1';
+                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker}:</span> <span class="interim">${interimText}</span></p>`;
                 }
-            };
-            
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                loadSavedRecordings();
-            };
-            
-            // Save recording to IndexedDB
-            function saveToIndexedDB(id, blob, name) {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readwrite');
-                const store = transaction.objectStore('recordings');
-                const recording = {
-                    id: id,
-                    blob: blob,
-                    name: name,
-                    date: new Date().toISOString()
-                };
-                
-                store.add(recording);
+
+                transcript.innerHTML = html || 'Transcript will appear here...';
+                transcript.scrollTop = transcript.scrollHeight;
             }
-            
-            // Load saved recordings from IndexedDB
-            function loadSavedRecordings() {
-                if (!db) return;
-                
-                const transaction = db.transaction(['recordings'], 'readonly');
-                const store = transaction.objectStore('recordings');
-                const request = store.getAll();
-                
-                request.onsuccess = (event) => {
-                    const recordings = event.target.result;
-                    recordings.forEach(recording => {
-                        const audioUrl = URL.createObjectURL(recording.blob);
-                        
-                        const recordingItem = document.createElement('div');
-                        recordingItem.className = 'recording-item';
-                        recordingItem.innerHTML = `
-                            <div class="recording-info">
-                                <p>${recording.name}</p>
-                            </div>
-                            <div class="recording-actions">
-                                <audio src="${audioUrl}" controls></audio>
-                                <button class="btn-sm btn-primary download-recording" data-id="${recording.id}">
-                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="7 10 12 15 17 10"></polyline>
-                                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        `;
-                        
-                        savedRecordings.appendChild(recordingItem);
-                        
-                        // Add event listener for download button
-                        recordingItem.querySelector('.download-recording').addEventListener('click', () => {
-                            const a = document.createElement('a');
-                            a.href = audioUrl;
-                            a.download = `${recording.name}.mp3`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        });
-                        
-                        // Add event listener for delete button
-                        recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
-                            if (confirm('Are you sure you want to delete this recording?')) {
-                                deleteRecording(recording.id);
-                                recordingItem.remove();
-                            }
-                        });
-                    });
-                };
-            }
-            
-            // Handle recognition results
+
             recognition.onresult = (event) => {
                 let interimTranscript = '';
                 let finalTranscript = '';
-                
+
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const result = event.results[i];
                     if (result.isFinal) {
-                        // Apply grammar correction
-                        const correctedText = correctGrammar(result[0].transcript);
-                        finalTranscript += correctedText;
+                        finalTranscript += result[0].transcript;
                     } else {
                         interimTranscript += result[0].transcript;
                     }
                 }
-                
-                // Add final transcript to segments with current speaker
+
                 if (finalTranscript) {
-                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
+                    const currentSpeaker = speakers[currentSpeakerIndex] || 'Speaker 1';
                     transcriptSegments.push({
-                        speaker: speakerName,
-                        speakerClass: speakerClass,
+                        speaker: currentSpeaker,
                         text: finalTranscript.trim()
                     });
-                    
-                    // Cycle to next speaker for the next segment
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakers.length;
                 }
-                
-                // Update display
+
                 updateTranscriptDisplay(interimTranscript);
             };
-            
-            // Update the transcript display
-            function updateTranscriptDisplay(interimText = '') {
-                let html = '';
-                
-                // Add all transcript segments
-                transcriptSegments.forEach(segment => {
-                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
-                });
-                
-                // Add interim text if available
-                if (interimText) {
-                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    // Show grammar correction for interim text if enabled
-                    const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
-                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
-                }
-                
-                transcript.innerHTML = html;
-                
-                // Scroll to bottom
-                transcript.scrollTop = transcript.scrollHeight;
-            }
-            
-            // Copy transcript to clipboard
-            function copyTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                navigator.clipboard.writeText(fullText)
-                    .then(() => {
-                        statusText.textContent = 'Transcript copied to clipboard';
-                        setTimeout(() => {
-                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy text: ', err);
-                    });
-            }
-            
-            // Download transcript as text file
-            function downloadTranscript() {
-                let fullText = '';
-                
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
-                
-                const blob = new Blob([fullText], { type: 'text/plain' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `transcript-${new Date().toISOString().slice(0, 10)}.txt`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            // Download the latest audio recording
-            function downloadAudio() {
-                if (audioChunks.length === 0) {
-                    statusText.textContent = 'No audio recording available';
-                    setTimeout(() => {
-                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
-                    }, 2000);
-                    return;
-                }
-                
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                const url = URL.createObjectURL(audioBlob);
-                const a = document.createElement('a');
-                
-                a.href = url;
-                a.download = `audio-${new Date().toISOString().slice(0, 10)}.mp3`;
-                document.body.appendChild(a);
-                a.click();
-                
-                // Cleanup
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-            
-            // Theme switching functionality
-            function updateTheme(value) {
-                // Remove any existing theme classes
-                document.body.classList.remove('dark-theme', 'blue-light-theme', 'discrete-theme');
-                
-                // Update theme container visibility based on discrete mode
-                const themeContainer = document.querySelector('.theme-container');
-                if (parseInt(value) === 2) { // Discrete/Notepad mode
-                    themeContainer.classList.remove('compact-theme-switcher');
-                } else {
-                    themeContainer.classList.add('compact-theme-switcher');
-                }
-                
-                // Add new theme class based on slider value
-                switch (parseInt(value)) {
-                    case 0: // Standard (no class needed)
-                        document.title = "Voice Transcription";
-                        break;
-                    case 1: // Blue Light Filter
-                        document.body.classList.add('blue-light-theme');
-                        document.title = "Voice Transcription";
-                        break;
-                    case 2: // Discrete/Notepad
-                        document.body.classList.add('discrete-theme');
-                        document.title = "My Notes"; // Change page title for added discretion
-                        break;
-                    case 3: // Dark
-                        document.body.classList.add('dark-theme');
-                        document.title = "Voice Transcription";
-                        break;
-                }
-                
-                // Save theme preference to localStorage
-                localStorage.setItem('theme', value);
-            }
-            
-            // Load saved theme preference
-            function loadThemePreference() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme !== null) {
-                    themeSlider.value = savedTheme;
-                    updateTheme(savedTheme);
-                    
-                    // If discrete theme is selected, update the theme container class
-                    if (parseInt(savedTheme) === 2) {
-                        document.querySelector('.theme-container').classList.remove('compact-theme-switcher');
-                    }
-                }
-            }
-            
-            // Event Listeners
-            recordBtn.addEventListener('click', startRecording);
-            stopBtn.addEventListener('click', stopRecording);
-            copyBtn.addEventListener('click', copyTranscript);
-            downloadTextBtn.addEventListener('click', downloadTranscript);
-            downloadAudioBtn.addEventListener('click', downloadAudio);
-            addProfileBtn.addEventListener('click', addSpeakerProfile);
-            
-            // Theme slider event listener
-            themeSlider.addEventListener('input', (e) => {
-                updateTheme(e.target.value);
-            });
-            
-            // Grammar toggle event listener
-            grammarToggle.addEventListener('change', () => {
-                // Update the display to reflect grammar toggle state
-                updateTranscriptDisplay();
-                
-                // Save preference
-                localStorage.setItem('grammarCorrection', grammarToggle.checked);
-            });
-            
-            // Recognition event handlers
+
             recognition.onerror = (event) => {
-                console.error('Recognition error:', event.error);
                 statusText.textContent = `Error: ${event.error}`;
                 stopRecording();
-                
-                // Show a more helpful message for common errors
-                if (event.error === 'not-allowed') {
-                    alert("Microphone permission was denied. Please allow microphone access to use this app.");
-                } else if (event.error === 'no-speech') {
-                    statusText.textContent = "No speech detected. Please try again.";
-                } else if (event.error === 'network') {
-                    statusText.textContent = "Network error occurred. Please check your connection.";
-                }
             };
-            
+
             recognition.onend = () => {
                 if (isRecording) {
                     recognition.start();
                 }
             };
-            
-            // Initial setup
-            populateVoiceList();
-            updateProfileEventListeners();
-            loadThemePreference();
-            
-            // Load saved grammar correction preference
-            const savedGrammarPreference = localStorage.getItem('grammarCorrection');
-            if (savedGrammarPreference !== null) {
-                grammarToggle.checked = savedGrammarPreference === 'true';
-            }
-            
-            // Manually cycle through speakers (for demo/testing)
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Tab' && isRecording) {
                     e.preventDefault();
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
-                    
+                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakers.length;
+                    const currentSpeaker = speakers[currentSpeakerIndex];
+                    statusText.textContent = `Switched to ${currentSpeaker}`;
                     setTimeout(() => {
                         statusText.textContent = 'Recording...';
                     }, 1500);
                 }
+            });
+
+            document.querySelector('.speaker-input').addEventListener('input', (e) => {
+                speakers[0] = e.target.value;
             });
         });
     </script>
