@@ -1,13 +1,13 @@
-# Voice Transcription App
+# Voice Transcription 
 
 A web-based voice transcription tool with live transcription, recording capabilities
 
-**Live Demo:** [https://andrewminseo.github.io/voice/](https://andrewminseo.github.io/voice/)
+[https://andrewminseo.github.io/voice/](https://andrewminseo.github.io/voice/)
 
 
 ## How It Works
 
-Web Speech API's SpeechRecognition interface to converts speech to text in real-time. 
+Web Speech API interface to convert speech to text in real-time. 
 
 ```javascript
 const recognition = new window.SpeechRecognition();
