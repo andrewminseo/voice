@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Captionsssssssssss</title>
+    <title>Live Transcription</title>
     <style>
         :root {
             /* Default theme (Light) */
@@ -180,10 +180,6 @@
             display: none;
         }
         
-        .discrete-theme .speaker-profiles {
-            display: none;
-        }
-        
         .discrete-theme .transcript-container {
             border: none;
             background: transparent;
@@ -326,10 +322,6 @@
             height: 18px;
         }
         
-        .speaker-profiles {
-            margin-bottom: 1.5rem;
-        }
-        
         .transcript-container {
             margin-top: 2rem;
             border: 1px solid var(--border-color);
@@ -345,23 +337,6 @@
             white-space: pre-wrap;
             line-height: 1.7;
             color: var(--text-color);
-        }
-        
-        .speaker {
-            font-weight: bold;
-            margin-right: 6px;
-        }
-        
-        .speaker-1 {
-            color: var(--primary-color);
-        }
-        
-        .speaker-2 {
-            color: var(--secondary-color);
-        }
-        
-        .speaker-3 {
-            color: var(--accent-color);
         }
         
         .status {
@@ -384,36 +359,6 @@
         .status-recording .status-indicator {
             background-color: var(--error-color);
             animation: pulse 1.5s infinite;
-        }
-        
-        .profile-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input, select {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            background-color: var(--container-background);
-            color: var(--text-color);
-        }
-        
-        .add-profile {
-            background-color: var(--success-color);
-            color: white;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .add-profile:hover {
-            background-color: #27ae60;
         }
         
         .export-options {
@@ -673,44 +618,31 @@
         </header>
         
         <div class="theme-container compact-theme-switcher">
-        <div class="theme-switcher">
-            <h3>Interface Mode</h3>
-            <div class="slider-container">
-                <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
-                <div class="slider-labels">
-                    <span class="slider-label">Standard</span>
-                    <span class="slider-label">Blue Light</span>
-                    <span class="slider-label">Notepad</span>
-                    <span class="slider-label">Dark</span>
+            <div class="theme-switcher">
+                <h3>Interface Mode</h3>
+                <div class="slider-container">
+                    <input type="range" min="0" max="3" step="1" value="0" class="theme-slider" id="themeSlider">
+                    <div class="slider-labels">
+                        <span class="slider-label">Standard</span>
+                        <span class="slider-label">Blue Light</span>
+                        <span class="slider-label">Notepad</span>
+                        <span class="slider-label">Dark</span>
+                    </div>
+                </div>
+                
+                <div class="feature-toggle">
+                    <label for="grammarToggle">Grammar Correction:</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="grammarToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
                 </div>
             </div>
-            
-            <div class="feature-toggle">
-                <label for="grammarToggle">Grammar Correction:</label>
-                <label class="toggle">
-                    <input type="checkbox" id="grammarToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
         </div>
-    </div>
         
         <div class="status">
             <div class="status-indicator"></div>
             <span class="status-text">Ready to record</span>
-        </div>
-        
-        <div class="speaker-profiles">
-            <h3>Speaker Profiles</h3>
-            <div class="profile-list">
-                <div class="profile-row">
-                    <input type="text" class="profile-name" placeholder="Speaker 1" value="Speaker 1">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                </div>
-            </div>
-            <button class="add-profile" id="addProfile">+ Add Speaker</button>
         </div>
         
         <div class="controls">
@@ -737,7 +669,7 @@
             <button id="copyBtn" class="btn btn-sm btn-primary">
                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2 2v1"></path>
                 </svg>
                 Copy Text
             </button>
@@ -776,13 +708,11 @@
             const copyBtn = document.getElementById('copyBtn');
             const downloadTextBtn = document.getElementById('downloadTextBtn');
             const downloadAudioBtn = document.getElementById('downloadAudioBtn');
-            const addProfileBtn = document.getElementById('addProfile');
-            const profileList = document.querySelector('.profile-list');
             const themeSlider = document.getElementById('themeSlider');
             const grammarToggle = document.getElementById('grammarToggle');
             const savedRecordings = document.getElementById('savedRecordings');
             
-            // Grammar correction dictionary (Simple example)
+            // Grammar correction dictionary
             const grammarCorrections = {
                 "i ": "I ",
                 "i'm": "I'm",
@@ -823,85 +753,9 @@
             
             // State variables
             let isRecording = false;
-            let currentSpeakerIndex = 0;
-            let speakerProfiles = [{ name: 'Speaker 1', voice: 'default' }];
-            let transcriptSegments = [];
+            let transcriptText = '';
             let audioChunks = [];
             let mediaRecorder = null;
-            
-            // Initialize speaker voices dropdown
-            function populateVoiceList() {
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                // Add some sample voice profiles
-                const voiceProfiles = [
-                    'Default Voice Profile', 
-                    'Deep Male Voice', 
-                    'High Female Voice',
-                    'Neutral Voice',
-                    'British Accent',
-                    'American Accent'
-                ];
-                
-                voiceSelects.forEach(select => {
-                    // Clear existing options first
-                    while(select.firstChild) {
-                        select.removeChild(select.firstChild);
-                    }
-                    
-                    // Add voice profiles
-                    voiceProfiles.forEach((profile, index) => {
-                        const option = document.createElement('option');
-                        option.value = profile.toLowerCase().replace(/\s+/g, '-');
-                        option.textContent = profile;
-                        select.appendChild(option);
-                    });
-                });
-            }
-            
-            // Add a new speaker profile
-            function addSpeakerProfile() {
-                const newIndex = speakerProfiles.length + 1;
-                const profileRow = document.createElement('div');
-                profileRow.className = 'profile-row';
-                profileRow.innerHTML = `
-                    <input type="text" class="profile-name" placeholder="Speaker ${newIndex}" value="Speaker ${newIndex}">
-                    <select class="profile-voice">
-                        <option value="default">Default Voice Profile</option>
-                    </select>
-                `;
-                
-                profileList.appendChild(profileRow);
-                speakerProfiles.push({ name: `Speaker ${newIndex}`, voice: 'default' });
-                
-                // Update the voice options
-                populateVoiceList();
-                
-                // Update event listeners for the new inputs
-                updateProfileEventListeners();
-            }
-            
-            // Update speaker profiles when inputs change
-            function updateProfileEventListeners() {
-                const nameInputs = document.querySelectorAll('.profile-name');
-                const voiceSelects = document.querySelectorAll('.profile-voice');
-                
-                nameInputs.forEach((input, index) => {
-                    input.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].name = input.value;
-                        }
-                    });
-                });
-                
-                voiceSelects.forEach((select, index) => {
-                    select.addEventListener('change', () => {
-                        if (speakerProfiles[index]) {
-                            speakerProfiles[index].voice = select.value;
-                        }
-                    });
-                });
-            }
             
             // Apply grammar correction
             function correctGrammar(text) {
@@ -985,7 +839,7 @@
                 stopBtn.disabled = true;
             }
             
-            // Save recording to cookies and display in recordings list
+            // Save recording to IndexedDB
             function saveRecording(audioBlob) {
                 const recordingId = 'recording_' + Date.now();
                 const recordingName = `Recording ${new Date().toLocaleString()}`;
@@ -1010,7 +864,7 @@
                         <button class="btn-sm btn-danger delete-recording" data-id="${recordingId}">
                             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v4a2 2 0 0 1 2 2v2"></path>
                             </svg>
                         </button>
                     </div>
@@ -1018,10 +872,10 @@
                 
                 savedRecordings.appendChild(recordingItem);
                 
-                // Save to IndexedDB (more reliable than cookies for binary data)
+                // Save to IndexedDB
                 saveToIndexedDB(recordingId, audioBlob, recordingName);
                 
-                // Add event listener for download button
+                // Add event listeners
                 recordingItem.querySelector('.download-recording').addEventListener('click', () => {
                     const a = document.createElement('a');
                     a.href = audioUrl;
@@ -1031,7 +885,6 @@
                     document.body.removeChild(a);
                 });
                 
-                // Add event listener for delete button
                 recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
                     if (confirm('Are you sure you want to delete this recording?')) {
                         deleteRecording(recordingId);
@@ -1076,6 +929,15 @@
                 store.add(recording);
             }
             
+            // Delete recording from IndexedDB
+            function deleteRecording(id) {
+                if (!db) return;
+                
+                const transaction = db.transaction(['recordings'], 'readwrite');
+                const store = transaction.objectStore('recordings');
+                store.delete(id);
+            }
+            
             // Load saved recordings from IndexedDB
             function loadSavedRecordings() {
                 if (!db) return;
@@ -1104,12 +966,18 @@
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg>
                                 </button>
+                                <button class="btn-sm btn-danger delete-recording" data-id="${recording.id}">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
                             </div>
                         `;
                         
                         savedRecordings.appendChild(recordingItem);
                         
-                        // Add event listener for download button
+                        // Add event listeners
                         recordingItem.querySelector('.download-recording').addEventListener('click', () => {
                             const a = document.createElement('a');
                             a.href = audioUrl;
@@ -1119,7 +987,6 @@
                             document.body.removeChild(a);
                         });
                         
-                        // Add event listener for delete button
                         recordingItem.querySelector('.delete-recording').addEventListener('click', () => {
                             if (confirm('Are you sure you want to delete this recording?')) {
                                 deleteRecording(recording.id);
@@ -1140,25 +1007,15 @@
                     if (result.isFinal) {
                         // Apply grammar correction
                         const correctedText = correctGrammar(result[0].transcript);
-                        finalTranscript += correctedText;
+                        finalTranscript += correctedText + ' ';
                     } else {
                         interimTranscript += result[0].transcript;
                     }
                 }
                 
-                // Add final transcript to segments with current speaker
+                // Add final transcript to main text
                 if (finalTranscript) {
-                    const speakerName = speakerProfiles[currentSpeakerIndex].name;
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    transcriptSegments.push({
-                        speaker: speakerName,
-                        speakerClass: speakerClass,
-                        text: finalTranscript.trim()
-                    });
-                    
-                    // Cycle to next speaker for the next segment
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
+                    transcriptText += finalTranscript;
                 }
                 
                 // Update display
@@ -1167,24 +1024,15 @@
             
             // Update the transcript display
             function updateTranscriptDisplay(interimText = '') {
-                let html = '';
-                
-                // Add all transcript segments
-                transcriptSegments.forEach(segment => {
-                    html += `<p><span class="speaker ${segment.speakerClass}">${segment.speaker}:</span> ${segment.text}</p>`;
-                });
+                let displayText = transcriptText;
                 
                 // Add interim text if available
                 if (interimText) {
-                    const currentSpeaker = speakerProfiles[currentSpeakerIndex];
-                    const speakerClass = `speaker-${(currentSpeakerIndex % 3) + 1}`;
-                    
-                    // Show grammar correction for interim text if enabled
                     const correctedInterim = grammarToggle.checked ? correctGrammar(interimText) : interimText;
-                    html += `<p><span class="speaker ${speakerClass}">${currentSpeaker.name}:</span> <span class="interim">${correctedInterim}</span></p>`;
+                    displayText += '<span class="interim" style="opacity: 0.7; font-style: italic;">' + correctedInterim + '</span>';
                 }
                 
-                transcript.innerHTML = html;
+                transcript.innerHTML = displayText;
                 
                 // Scroll to bottom
                 transcript.scrollTop = transcript.scrollHeight;
@@ -1192,13 +1040,17 @@
             
             // Copy transcript to clipboard
             function copyTranscript() {
-                let fullText = '';
+                const textToCopy = transcriptText.trim();
                 
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
+                if (!textToCopy) {
+                    statusText.textContent = 'No transcript to copy';
+                    setTimeout(() => {
+                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                    }, 2000);
+                    return;
+                }
                 
-                navigator.clipboard.writeText(fullText)
+                navigator.clipboard.writeText(textToCopy)
                     .then(() => {
                         statusText.textContent = 'Transcript copied to clipboard';
                         setTimeout(() => {
@@ -1207,18 +1059,26 @@
                     })
                     .catch(err => {
                         console.error('Failed to copy text: ', err);
+                        statusText.textContent = 'Failed to copy transcript';
+                        setTimeout(() => {
+                            statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                        }, 2000);
                     });
             }
             
             // Download transcript as text file
             function downloadTranscript() {
-                let fullText = '';
+                const textToDownload = transcriptText.trim();
                 
-                transcriptSegments.forEach(segment => {
-                    fullText += `${segment.speaker}: ${segment.text}\n`;
-                });
+                if (!textToDownload) {
+                    statusText.textContent = 'No transcript to download';
+                    setTimeout(() => {
+                        statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                    }, 2000);
+                    return;
+                }
                 
-                const blob = new Blob([fullText], { type: 'text/plain' });
+                const blob = new Blob([textToDownload], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 
@@ -1292,7 +1152,7 @@
                         break;
                 }
                 
-                // Save theme preference to localStorage
+                // Save theme preference
                 localStorage.setItem('theme', value);
             }
             
@@ -1310,13 +1170,22 @@
                 }
             }
             
+            // Clear transcript function
+            function clearTranscript() {
+                transcriptText = '';
+                transcript.innerHTML = '';
+                statusText.textContent = 'Transcript cleared';
+                setTimeout(() => {
+                    statusText.textContent = isRecording ? 'Recording...' : 'Ready to record';
+                }, 2000);
+            }
+            
             // Event Listeners
             recordBtn.addEventListener('click', startRecording);
             stopBtn.addEventListener('click', stopRecording);
             copyBtn.addEventListener('click', copyTranscript);
             downloadTextBtn.addEventListener('click', downloadTranscript);
             downloadAudioBtn.addEventListener('click', downloadAudio);
-            addProfileBtn.addEventListener('click', addSpeakerProfile);
             
             // Theme slider event listener
             themeSlider.addEventListener('input', (e) => {
@@ -1354,9 +1223,34 @@
                 }
             };
             
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+R or Cmd+R to start/stop recording
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    if (isRecording) {
+                        stopRecording();
+                    } else {
+                        startRecording();
+                    }
+                }
+                
+                // Ctrl+C or Cmd+C to copy transcript (when not in input field)
+                if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.matches('input, textarea')) {
+                    e.preventDefault();
+                    copyTranscript();
+                }
+                
+                // Ctrl+Shift+C or Cmd+Shift+C to clear transcript
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to clear the transcript?')) {
+                        clearTranscript();
+                    }
+                }
+            });
+            
             // Initial setup
-            populateVoiceList();
-            updateProfileEventListeners();
             loadThemePreference();
             
             // Load saved grammar correction preference
@@ -1364,19 +1258,6 @@
             if (savedGrammarPreference !== null) {
                 grammarToggle.checked = savedGrammarPreference === 'true';
             }
-            
-            // Manually cycle through speakers (for demo/testing)
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Tab' && isRecording) {
-                    e.preventDefault();
-                    currentSpeakerIndex = (currentSpeakerIndex + 1) % speakerProfiles.length;
-                    statusText.textContent = `Switched to ${speakerProfiles[currentSpeakerIndex].name}`;
-                    
-                    setTimeout(() => {
-                        statusText.textContent = 'Recording...';
-                    }, 1500);
-                }
-            });
         });
     </script>
 </body>
